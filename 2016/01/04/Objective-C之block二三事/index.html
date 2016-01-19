@@ -59,7 +59,7 @@
 <meta property="og:url" content="http://nerdfooprogrammer.github.io/2016/01/04/Objective-C之block二三事/index.html">
 <meta property="og:site_name" content="NerdFooProgrammer's blog">
 <meta property="og:description" content="Block是iOS4引入的功能，灵活运用Block可使代码简洁易读，本文通过Block是什么、Block和函数的区别以及__block的意义等方面展开讲解。">
-<meta property="og:updated_time" content="2016-01-11T14:37:42.000Z">
+<meta property="og:updated_time" content="2016-01-19T14:44:52.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Objective-C之Block二三事">
 <meta name="twitter:description" content="Block是iOS4引入的功能，灵活运用Block可使代码简洁易读，本文通过Block是什么、Block和函数的区别以及__block的意义等方面展开讲解。">
@@ -299,7 +299,8 @@ int main()
     ((void (*)(__block_impl *))((__block_impl *)blk)-&gt;FuncPtr)((__block_impl *)blk);
     return 0;
 }
-</code></pre><h2 id="u4E8C_u3001Block_u548C_u51FD_u6570_u7684_u533A_u522B"><a href="#u4E8C_u3001Block_u548C_u51FD_u6570_u7684_u533A_u522B" class="headerlink" title="二、Block和函数的区别"></a>二、Block和函数的区别</h2><ul>
+</code></pre><p>从上面可以看出<code>Block</code>转变成了<code>struct __main_block_impl_0</code>，自动截获的<code>val</code>也变成了结构体的成员变量，然后在结构体的构造函数中用需要截获的变量值进行初始化。至此可以清晰地看出<code>Blcok</code>的本质是<code>struct</code>,是Objective-C的对象。</p>
+<h2 id="u4E8C_u3001Block_u548C_u51FD_u6570_u7684_u533A_u522B"><a href="#u4E8C_u3001Block_u548C_u51FD_u6570_u7684_u533A_u522B" class="headerlink" title="二、Block和函数的区别"></a>二、Block和函数的区别</h2><ul>
 <li>静态与动态</li>
 </ul>
 <p>Block是Objective－C对象，既然是对象，那么就是运行时的产物，只有运行的时候才能确定；而函数代表的是地址，它是静态的，在编译器就确定了。所以Block与函数最大的区别就是产生的时机不同。</p>
@@ -317,7 +318,7 @@ int main()
     };
     externalBlock();
 }
-</code></pre><p>但函数缺不能嵌套定义，比如你不能编写这样的函数：</p>
+</code></pre><p>但函数却不能嵌套定义，比如你不能编写这样的函数：</p>
 <pre><code>void main()
 {
     void fun1(void)
@@ -329,7 +330,7 @@ int main()
         fun2();
     }
 }
-</code></pre><h2 id="u4E09_u3001__block_u4FEE_u9970_u7B26_u7684_u542B_u4E49"><a href="#u4E09_u3001__block_u4FEE_u9970_u7B26_u7684_u542B_u4E49" class="headerlink" title="三、__block修饰符的含义"></a>三、__block修饰符的含义</h2><p>当我们想要在Block内部修改某个<strong>自动局部变量</strong>时,必须在自动局部变量前加上__block修饰符。那么大家想过为什么一定要加__block呢，不加<strong>block为什么就不能修改呢？想要回答这写问题可以从本文的第一小节入手。<br>在第一小节中自动局部变量<code>val</code>经过编译器转换后变成`struct </strong>main_block_impl_0<code>中个一个成员</code>int val<code>，然后在</code>struct <strong>main_block_impl_0<code>的构造函数中用截获的自动变量</code>_val<code>的值初始化</code>struct </strong>main_block_impl_0<code>的成员</code>int val<code>，从整个构造过程可以看出</code>val`是值传递而不是引用传递，所以在Block中是修改不了Block外部的自动变量的值，这个问题就好比如大家都学过的swap函数，要想能交换两个变量的值，swap函数的形参必须是地址。<br>那么增加__block修饰符变换后的C++代码是什么样子呢？我们依然用clang 的－rewrite-objc命令，假设Block源码为：</p>
+</code></pre><h2 id="u4E09_u3001__block_u4FEE_u9970_u7B26_u7684_u542B_u4E49"><a href="#u4E09_u3001__block_u4FEE_u9970_u7B26_u7684_u542B_u4E49" class="headerlink" title="三、__block修饰符的含义"></a>三、__block修饰符的含义</h2><p>当我们想要在Block内部修改某个<strong>自动局部变量</strong>时,必须在自动局部变量前加上__block修饰符。那么大家想过为什么一定要加__block呢，不加__block为什么就不能修改呢？想要回答这写问题可以从本文的第一小节入手。<br>在第一小节中自动局部变量<code>val</code>经过编译器转换后变成<code>struct __main_block_impl_0</code>中个一个成员<code>int val</code>，然后在<code>struct __main_block_impl_0</code>的构造函数中用截获的自动变量<code>_val</code>的值初始化<code>struct __main_block_impl_0</code>的成员<code>int val</code>，从整个构造过程可以看出<code>val</code>是值传递而不是引用传递，所以在Block中是修改不了Block外部的自动变量的值，这个问题就好比如大家都学过的swap函数，要想能交换两个变量的值，swap函数的形参必须是地址。<br>那么增加__block修饰符变换后的C++代码是什么样子呢？我们依然用clang 的－rewrite-objc命令，假设Block源码为：</p>
 <pre><code>#include&quot;stdio.h&quot;
 int main()
 {    
@@ -418,6 +419,10 @@ int main()
 
           <div class="post-nav-prev post-nav-item">
             
+              <a href="/2016/01/13/浅析GCD/" rel="prev" title="浅析GCD">
+                浅析GCD <i class="fa fa-chevron-right"></i>
+              </a>
+            
           </div>
         </div>
       
@@ -488,7 +493,7 @@ int main()
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">3</span>
+              <span class="site-state-item-count">4</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
