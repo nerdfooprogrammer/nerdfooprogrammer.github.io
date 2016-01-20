@@ -257,7 +257,109 @@
         
           <span itemprop="articleBody">
             
-              
+              <p>Grand Central Dispatch(GCD)是iOS特有的多线程技术之一。GCD帮开发者在系统级别中完成了线程的创建和管理，开发者只需要定义想执行的任务已Block的形式追加到适当的Dispatch Queue中即可，GCD会自动为你生成所必需的线程然后执行指定的任务，按我的理解GCD其实就是线程池，完成线程管理工作。下面主要通过GCD的API和GCD的特点两方面进行介绍。<br>!&lt;–more–&gt;</p>
+<p>##GCD特点<br>GCD优点：</p>
+<ol>
+<li>编码非常简单,不用关心线程管理，只需关注要执行的任务;</li>
+<li>GCD是在系统级层面上实现的，可以充分利用硬件资源</li>
+</ol>
+<p>GCD缺点：</p>
+<ol>
+<li>不能取消追加的Block；</li>
+<li>不能指定追加的Block优先级。</li>
+</ol>
+<p>##GCD API</p>
+<p>###dispatch_queue_create</p>
+<p>通过dispatch_queue_create函数可生成Dispatch Queue。Dispatch Queue分串行队列（Serial Queue）和并行队列（Concurrent Queue）,以下源码生成一个串行队列:</p>
+<pre><code>dispatch_queue_t MySerialDispatchQueue = dispatch_queue_create(&quot;com.example.gcd.MySerialDispatchQueue&quot;, DISPATCH_QUEUE_SERIAL);
+</code></pre><p>想生成并行队列时只需把<code>DISPATCH_QUEUE_SERIAL</code>改成<code>DISPATCH_QUEUE_CONCURRE</code>即可。</p>
+<p>###Global Dispatch Queue/Main Dispatch Queue<br>dispatch_queue除了可以通过dispatch_queue_create主动创建之外，GCD还提供了几个标准的Queue，这些Queue就是Main Dispatch Queue和Global Dispatch Queue。</p>
+<p>Main Dispatch Queue是在主线程中执行的Queue，因主线程只有一个所以Main Dispatch Queue是串行队列。</p>
+<p>Global Dispatch Queue是全局的Queue，属于并行队列，共有4个优先级（高、默认、低和后台）。</p>
+<p>使用方法：</p>
+<pre><code>dispatch_queue_t mainDispatchQueue = dispatch_get_main_queue();
+    dispatch_queue_t globalDispatchQueue = dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0);
+</code></pre><p>###dispatch_after<br>延迟API，比如想在延迟3s后执行一些操作，可用如下源码实现：</p>
+<pre><code>dispatch_queue_t globalDispatchQueue = dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0);
+    dispatch_time_t time = dispatch_time(DISPATCH_TIME_NOW, 3*NSEC_PER_SEC);
+    dispatch_after(time, globalDispatchQueue, ^{
+        //after delay 3 seconds do something
+    });
+</code></pre><p>###dispatch_group</p>
+<p>当在并行队列中想实现当队列中所有的Block执行完毕后执行特定的任务时，就会用到dispatch group和dispatch_group_notify了，<code>dispatch_group_notify</code>表示当group中追加的任务已执行完毕。以下源码表示当blk0、blk1、blk2执行完毕后才会执行all blk finished!!!</p>
+<pre><code>dispatch_queue_t globalDispatchQueue = dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0);
+    dispatch_group_t group = dispatch_group_create();
+    dispatch_group_async(group, globalDispatchQueue, ^{
+        NSLog(@&quot;blk0&quot;);
+    });
+    dispatch_group_async(group, globalDispatchQueue, ^{
+        NSLog(@&quot;blk1&quot;);
+    });
+    dispatch_group_async(group, globalDispatchQueue, ^{
+        NSLog(@&quot;blk2&quot;);
+    });
+    dispatch_group_notify(group, globalDispatchQueue, ^{
+        NSLog(@&quot;all blk finished!!!&quot;);
+    });
+</code></pre><p>###dispatch_barrier_async<br>当想在Concurrent Dispatch Queue中想在指定的blok执行完后运行特定的操作，然后继续执行剩下的任务时dispatch_barrier_async就派上用场了，它和dispatch_group_notify区别是diapth_group_notify是在所有的block执行完毕才会通知，而dispatch_barrier_async可以是任意个blok执行完毕后执行，只和添加的block顺序强相关，它就像是一个栅栏，在它前面的以正常并行任务执行，当执行完毕后才会执行指定的任务，当指定的任务执行完后，才会执行dispatch_barrier_async后面添加的block。以下源码一定是blk0、blk1一定在blk2之前，blk3、blk4一定在blk2之后。</p>
+<pre><code>dispatch_queue_t globalDispatchQueue = dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0);
+    dispatch_async(globalDispatchQueue, ^{
+        NSLog(@&quot;blk0&quot;);
+    });
+    dispatch_async(globalDispatchQueue, ^{
+        NSLog(@&quot;blk1&quot;);
+    });
+    dispatch_barrier_async(globalDispatchQueue, ^{
+        NSLog(@&quot;blk2&quot;);
+    });
+    dispatch_async(globalDispatchQueue, ^{
+        NSLog(@&quot;blk3&quot;);
+    });
+    dispatch_async(globalDispatchQueue, ^{
+        NSLog(@&quot;blk4&quot;);
+    });
+</code></pre><p>###dispatch_sync<br>dispatch_sync是同步地追加blok，也就是说在block执行完毕前当前diaptch_sync会一直等待，因为一直在等待所以使用dispatch_sync需要格外小心以免死锁，在主线程中调用如下代码就会死锁：</p>
+<pre><code>dispatch_sync(dispatch_get_main_queue(), ^{
+    NSLog(@&quot;dispatch_sync deadlock!!!&quot;);
+});
+因为当前线程会一直在掉用dispatch_sync处等待，而追加的block又需要在主线程（当前线程）上执行，所以就会死锁。
+</code></pre><p>###dispatch_apply<br>dispatch_apply函数是按指定的次数将指定的Block追加到指定的Dispatch Queue中，并等待全部执行完毕，该API是同步的。</p>
+<p>###dispatch_suspend/dispatch_resume<br>从名字就能判断出来dispatch_suspend就是挂起指定的Queue，dispatch_resume恢复指定的Queue。</p>
+<p>###dispatch Semaphore<br>dispatch Semaphore是信号量，用于多线程通过，比如以下代码就存在高概率crash风险：</p>
+<pre><code>NSMutableArray *array = [NSMutableArray array];
+    dispatch_queue_t globalDispatchQueue = dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0);
+    for(NSUInteger i=0;i&lt;10000;i++)
+    {
+        dispatch_async(globalDispatchQueue, ^{
+            [array addObject:[NSNumber numberWithUnsignedInteger:i]];
+        });
+    }
+因为NSMutableArray不是线程安全的，所以并行地往NSMutableArray添加item时就回crash掉。
+</code></pre><p>那怎么才能让上面的代码正常运行呢？其中的一种方法就是利用dispatch_semaphore进行排它操作。修正后的代码如下：</p>
+<pre><code>NSMutableArray *array = [[NSMutableArray alloc] init];
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(1);
+    dispatch_queue_t globalDispatchQueue = dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0);
+    for(NSUInteger i=0;i&lt;1000;i++)
+    {
+        //等待信号量，进行排它操作
+        dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+        dispatch_async(globalDispatchQueue, ^{
+            [array addObject:[NSNumber numberWithUnsignedInteger:i]];
+        });
+        //释放信号量，以便其它等待该信号的线程运行
+        dispatch_semaphore_signal(semaphore);
+    }
+</code></pre><p>###dispatch_once<br>想必dispatch_once函数大家很熟悉了，在编写单例模式时都会用到，简而言之就是在APP运行过程中只会执行一次。</p>
+<p>###dispatch I/O<br>dispatch I/O可以快速地读取文件，该API还没好好研究，就不讲了。</p>
+<p>###dispatch_sourece<br>dispatch_sourece可以实现timer，以下源码实现了一个每隔3s执行一次的timer，一定要注意<code>dispatch_source_t timer</code>不能被释放掉，否则不会出发定时器，<strong>一般会将<code>dispatch_source_t timer</code>设置成为成员变量</strong>。</p>
+<pre><code>dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0));
+
+dispatch_source_set_timer(timer, DISPATCH_TIME_NOW, 3*NSEC_PER_SEC, 0 * NSEC_PER_SEC);
+dispatch_source_set_event_handler(timer, ^{
+    NSLog(@&quot;time out&quot;);
+});
+dispatch_resume(timer);
+</code></pre>
             
           </span>
         
