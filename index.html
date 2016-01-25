@@ -189,6 +189,15 @@
 
     
     
+      
+      
+        
+        
+        
+      
+
+      
+    
 
     
       
@@ -212,8 +221,8 @@
             
               
                 
-                <a class="post-title-link" href="/2016/01/13/浅析GCD/" itemprop="url">
-                  浅析GCD
+                <a class="post-title-link" href="/2016/01/25/窥探NSOperation/" itemprop="url">
+                  窥探NSOperation
                 </a>
               
             
@@ -223,8 +232,8 @@
         <div class="post-meta">
           <span class="post-time">
             发表于
-            <time itemprop="dateCreated" datetime="2016-01-13T22:34:00+08:00" content="2016-01-13">
-              2016-01-13
+            <time itemprop="dateCreated" datetime="2016-01-25T21:49:13+08:00" content="2016-01-25">
+              2016-01-25
             </time>
           </span>
 
@@ -234,8 +243,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/01/13/浅析GCD/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/01/13/浅析GCD/" itemprop="commentsCount"></span>
+                <a href="/2016/01/25/窥探NSOperation/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/01/25/窥探NSOperation/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -255,277 +264,39 @@
 
       
         
-          <p>Grand Central Dispatch(GCD)是iOS特有的多线程技术之一。GCD帮开发者在系统级别中完成了线程的创建和管理，开发者只需要定义想执行的任务已Block的形式追加到适当的Dispatch Queue中即可，GCD会自动为你生成所必需的线程然后执行指定的任务，按我的理解GCD其实就是线程池，完成线程管理工作。下面主要通过GCD的API和GCD的特点两方面进行介绍。<br>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/01/13/浅析GCD/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
+          <span itemprop="articleBody">
             
-            
-              
-                
-                <a class="post-title-link" href="/2016/01/04/Objective-C之block二三事/" itemprop="url">
-                  Objective-C之Block二三事
-                </a>
-              
-            
-          </h1>
-        
+              <p>NSOperation是iOS开发中实现多线程的一种简便方式，它与GCD类似也是不需要开发者手动管理线程，只需要关注要实现的task。NSOperation属于CocoTouch框架，是面向对象的，它的底层是通过GCD实现的。</p>
+<p>##NSOperation相关知识点</p>
+<p>###NSOperation Queue<br>NSOperation与GCD类似，一般的使用方法都是把要实现的任务enqueue到相应的Queue中，Queue会管理相关的线程，然后任务就会执行。可以通过<code>[NSOperationQueue mainQueue]</code>或者标准的两段式<code>[NSOperationQueue alloc] init]</code>来创建。</p>
+<p>###串行队列or并行队列<br>可以通过<code>maxConcurrentOperationCount</code>设置队列属性，当<code>maxConcurrentOperationCount＝ 1</code> 是为串行队列，其它则为并行队列。</p>
+<p>###队列优先级<br>在iOS8以后可以设置队列的优先级，让重要的事情优先执行，队列的优先级是通过<code>NSQualityOfService qualityOfService</code>来设置，主要有4个级别，从高到低为：NSQualityOfServiceUserInteractive、NSQualityOfServiceUserInitiated、NSQualityOfServiceUtility和NSQualityOfServiceBackground。</p>
+<p>###NSOperation类<br>NSOperation是一个Abstract Class，它定义了基本的接口，不能直接使用，好在Foundation为我们提供了2个concrete subclass，分别为NSBlockOperation和NSInvocationOperation。类继承关系如下图所示：<img src="http://7xqh3q.com1.z0.glb.clouddn.com/NSOperation.png" alt="NSOperaion"></p>
+<p>NSOperation也定义了开始方法<code>start</code>和任务方法<code>main</code>，但一般都不会用到，平常真正使用的是NSBlockOperation和NSInvocationOperation。</p>
+<p>###NSBlockOperation&amp;NSInvocationOperaion<br>NSBlockOperaion是通过Block的形势定义任务，例如创建NSBlockOperaion的API为:<br><code>+ (instancetype)blockOperationWithBlock:(void (^)(void))block;</code>;<br>NSInvocationOperaion是标准的target－selector，创建的API为<br><code>- (nullable instancetype)initWithTarget:(id)target selector:(SEL)sel object:(nullable id)arg;</code></p>
+<p>###NSOperation状态管理<br>NSOperation可以通过<code>cancelled</code>、<code>executing</code>、<code>finished</code>、<code>ready</code>来查询当前的任务运行状态，上述状态都是通过KVO实现的。取消任务需调用<code>cancel</code>接口。</p>
+<p>###NSOperation优先级<br>NSOperaion可以通过<code>NSOperationQueuePriority queuePriority</code>来指定某个Operaion在Queue中执行的优先级。</p>
+<p>###任务依赖<br>当任务A依赖任务B时，用NSOperation实现时最方便的，伪代码如下：</p>
+<pre><code>//先执行B Operation，后执行A Operation
+NSBlockOperation *A = [NSBlockOperation blockOperationWithBlock:^{
+    NSLog(@&quot;A Operation!!!!&quot;);
+}];
 
-        <div class="post-meta">
-          <span class="post-time">
-            发表于
-            <time itemprop="dateCreated" datetime="2016-01-04T22:56:58+08:00" content="2016-01-04">
-              2016-01-04
-            </time>
+NSBlockOperation *B = [NSBlockOperation blockOperationWithBlock:^{
+    NSLog(@&quot;B Operation!!!!&quot;);
+}];
+[A addDependency:B];
+</code></pre><p>##NSOperaion与GCD区别</p>
+<ol>
+<li>NSOperation是对象而GCD是C的API</li>
+<li>NSOperaion可以方便地查看某个任务的运行状态且可以任务取消Queue中的任务，但GCD却不行</li>
+<li>NSOperationQueue可以设置priority而Dispatch Queue不行</li>
+<li>NSOperation可以方便地设置任务之间的依赖关系，虽然GCD也可以通过dispatch_barrier_async()也能实现，但需要严格遵守添加次序，不够优雅简洁</li>
+<li>NSOperation可以方便地指定Operation的优先级，虽然GCD也可以通过dispatch_barrier_async()也能实现，但需要严格遵守添加次序，不够优雅简洁</li>
+</ol>
+
+            
           </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/01/04/Objective-C之block二三事/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/01/04/Objective-C之block二三事/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body">
-
-      
-      
-
-      
-        
-          <p>  Block是iOS4引入的功能，灵活运用Block可使代码简洁易读，本文通过Block是什么、Block和函数的区别以及__block的意义等方面展开讲解。
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/01/04/Objective-C之block二三事/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/01/03/Singleton/" itemprop="url">
-                  Objective-C之严格单例模式正确实现
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            发表于
-            <time itemprop="dateCreated" datetime="2016-01-03T22:49:48+08:00" content="2016-01-03">
-              2016-01-03
-            </time>
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/01/03/Singleton/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/01/03/Singleton/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body">
-
-      
-      
-
-      
-        
-          <p><strong>注：本文搬移自我自己的博客园<a href="http://www.cnblogs.com/NerdFooProgrammer/p/4870260.html">http://www.cnblogs.com/NerdFooProgrammer/p/4870260.html</a></strong></p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;当希望在一个应用程序中某个类的对象只能存在一个的时候就可以考虑用单例模式来实现，单例模式在C++中比较容易实现（只需把构造函数声明为private），而在Objective-C中对象可以通过NSObject的alloc来产生，所以需要编写一些额外的代码来确保对象的唯一性，考虑到现在编写iOS APP代码几乎都是ARC方式，且GCD也已经被用烂了，故本文给出一种利用GCD技术来实现严格单例模式的ARC版本。
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2016/01/03/Singleton/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-        
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2015/12/30/hello-world/" itemprop="url">
-                  Hello World
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            发表于
-            <time itemprop="dateCreated" datetime="2015-12-30T22:11:08+08:00" content="2015-12-30">
-              2015-12-30
-            </time>
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2015/12/30/hello-world/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/12/30/hello-world/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body">
-
-      
-      
-
-      
-        
-          <p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.<br>
-          <div class="post-more-link text-center">
-            <a class="btn" href="/2015/12/30/hello-world/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
         
       
     </div>
@@ -586,7 +357,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">4</span>
+              <span class="site-state-item-count">5</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
