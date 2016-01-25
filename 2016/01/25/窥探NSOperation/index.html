@@ -60,7 +60,7 @@
 <meta property="og:site_name" content="NerdFooProgrammer's blog">
 <meta property="og:description" content="NSOperation是iOS开发中实现多线程的一种简便方式，它与GCD类似也是不需要开发者手动管理线程，只需要关注要实现的task即可。NSOperation属于CocoTouch框架，是面向对象的，它的底层是通过GCD实现的。">
 <meta property="og:image" content="http://7xqh3q.com1.z0.glb.clouddn.com/NSOperation.png">
-<meta property="og:updated_time" content="2016-01-25T15:24:07.000Z">
+<meta property="og:updated_time" content="2016-01-25T15:26:14.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="窥探NSOperation">
 <meta name="twitter:description" content="NSOperation是iOS开发中实现多线程的一种简便方式，它与GCD类似也是不需要开发者手动管理线程，只需要关注要实现的task即可。NSOperation属于CocoTouch框架，是面向对象的，它的底层是通过GCD实现的。">
@@ -245,7 +245,7 @@
       
 
       
-        <span itemprop="articleBody"><p>NSOperation是iOS开发中实现多线程的一种简便方式，它与GCD类似也是不需要开发者手动管理线程，只需要关注要实现的task即可。NSOperation属于CocoTouch框架，是面向对象的，它的底层是通过GCD实现的。<a id="more"></a></p>
+        <span itemprop="articleBody"><p>NSOperation是iOS开发中实现多线程的一种简便方式，它与GCD类似也是不需要开发者手动管理线程，只需要关注要实现的task即可。NSOperation属于CocoTouch框架，是面向对象的，它的底层是通过GCD实现的。<br><a id="more"></a></p>
 <h2 id="NSOperation_u76F8_u5173_u77E5_u8BC6_u70B9"><a href="#NSOperation_u76F8_u5173_u77E5_u8BC6_u70B9" class="headerlink" title="NSOperation相关知识点"></a>NSOperation相关知识点</h2><h3 id="NSOperation_Queue"><a href="#NSOperation_Queue" class="headerlink" title="NSOperation Queue"></a>NSOperation Queue</h3><p>NSOperation与GCD类似，一般的使用方法都是把要实现的任务enqueue到相应的Queue中，Queue会管理相关的线程，然后任务就会执行。可以通过<code>[NSOperationQueue mainQueue]</code>或者标准的两段式<code>[NSOperationQueue alloc] init]</code>来创建。</p>
 <h3 id="u4E32_u884C_u961F_u5217or_u5E76_u884C_u961F_u5217"><a href="#u4E32_u884C_u961F_u5217or_u5E76_u884C_u961F_u5217" class="headerlink" title="串行队列or并行队列"></a>串行队列or并行队列</h3><p>可以通过<code>maxConcurrentOperationCount</code>设置队列属性，当<code>maxConcurrentOperationCount＝ 1</code> 是为串行队列，其它则为并行队列。</p>
 <h3 id="u961F_u5217_u4F18_u5148_u7EA7"><a href="#u961F_u5217_u4F18_u5148_u7EA7" class="headerlink" title="队列优先级"></a>队列优先级</h3><p>在iOS8以后可以设置队列的优先级，让重要的事情优先执行，队列的优先级是通过<code>NSQualityOfService qualityOfService</code>来设置，主要有4个级别，从高到低为：NSQualityOfServiceUserInteractive、NSQualityOfServiceUserInitiated、NSQualityOfServiceUtility和NSQualityOfServiceBackground。</p>
