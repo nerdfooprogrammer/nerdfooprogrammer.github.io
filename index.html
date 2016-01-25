@@ -264,39 +264,12 @@
 
       
         
-          <span itemprop="articleBody">
-            
-              <p>NSOperation是iOS开发中实现多线程的一种简便方式，它与GCD类似也是不需要开发者手动管理线程，只需要关注要实现的task。NSOperation属于CocoTouch框架，是面向对象的，它的底层是通过GCD实现的。</p>
-<p>##NSOperation相关知识点</p>
-<p>###NSOperation Queue<br>NSOperation与GCD类似，一般的使用方法都是把要实现的任务enqueue到相应的Queue中，Queue会管理相关的线程，然后任务就会执行。可以通过<code>[NSOperationQueue mainQueue]</code>或者标准的两段式<code>[NSOperationQueue alloc] init]</code>来创建。</p>
-<p>###串行队列or并行队列<br>可以通过<code>maxConcurrentOperationCount</code>设置队列属性，当<code>maxConcurrentOperationCount＝ 1</code> 是为串行队列，其它则为并行队列。</p>
-<p>###队列优先级<br>在iOS8以后可以设置队列的优先级，让重要的事情优先执行，队列的优先级是通过<code>NSQualityOfService qualityOfService</code>来设置，主要有4个级别，从高到低为：NSQualityOfServiceUserInteractive、NSQualityOfServiceUserInitiated、NSQualityOfServiceUtility和NSQualityOfServiceBackground。</p>
-<p>###NSOperation类<br>NSOperation是一个Abstract Class，它定义了基本的接口，不能直接使用，好在Foundation为我们提供了2个concrete subclass，分别为NSBlockOperation和NSInvocationOperation。类继承关系如下图所示：<img src="http://7xqh3q.com1.z0.glb.clouddn.com/NSOperation.png" alt="NSOperaion"></p>
-<p>NSOperation也定义了开始方法<code>start</code>和任务方法<code>main</code>，但一般都不会用到，平常真正使用的是NSBlockOperation和NSInvocationOperation。</p>
-<p>###NSBlockOperation&amp;NSInvocationOperaion<br>NSBlockOperaion是通过Block的形势定义任务，例如创建NSBlockOperaion的API为:<br><code>+ (instancetype)blockOperationWithBlock:(void (^)(void))block;</code>;<br>NSInvocationOperaion是标准的target－selector，创建的API为<br><code>- (nullable instancetype)initWithTarget:(id)target selector:(SEL)sel object:(nullable id)arg;</code></p>
-<p>###NSOperation状态管理<br>NSOperation可以通过<code>cancelled</code>、<code>executing</code>、<code>finished</code>、<code>ready</code>来查询当前的任务运行状态，上述状态都是通过KVO实现的。取消任务需调用<code>cancel</code>接口。</p>
-<p>###NSOperation优先级<br>NSOperaion可以通过<code>NSOperationQueuePriority queuePriority</code>来指定某个Operaion在Queue中执行的优先级。</p>
-<p>###任务依赖<br>当任务A依赖任务B时，用NSOperation实现时最方便的，伪代码如下：</p>
-<pre><code>//先执行B Operation，后执行A Operation
-NSBlockOperation *A = [NSBlockOperation blockOperationWithBlock:^{
-    NSLog(@&quot;A Operation!!!!&quot;);
-}];
-
-NSBlockOperation *B = [NSBlockOperation blockOperationWithBlock:^{
-    NSLog(@&quot;B Operation!!!!&quot;);
-}];
-[A addDependency:B];
-</code></pre><p>##NSOperaion与GCD区别</p>
-<ol>
-<li>NSOperation是对象而GCD是C的API</li>
-<li>NSOperaion可以方便地查看某个任务的运行状态且可以任务取消Queue中的任务，但GCD却不行</li>
-<li>NSOperationQueue可以设置priority而Dispatch Queue不行</li>
-<li>NSOperation可以方便地设置任务之间的依赖关系，虽然GCD也可以通过dispatch_barrier_async()也能实现，但需要严格遵守添加次序，不够优雅简洁</li>
-<li>NSOperation可以方便地指定Operation的优先级，虽然GCD也可以通过dispatch_barrier_async()也能实现，但需要严格遵守添加次序，不够优雅简洁</li>
-</ol>
-
-            
-          </span>
+          <p>NSOperation是iOS开发中实现多线程的一种简便方式，它与GCD类似也是不需要开发者手动管理线程，只需要关注要实现的task即可。NSOperation属于CocoTouch框架，是面向对象的，它的底层是通过GCD实现的。
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/01/25/窥探NSOperation/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
         
       
     </div>

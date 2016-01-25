@@ -53,23 +53,17 @@
 
 
 
-<meta name="description" content="NSOperation是iOS开发中实现多线程的一种简便方式，它与GCD类似也是不需要开发者手动管理线程，只需要关注要实现的task。NSOperation属于CocoTouch框架，是面向对象的，它的底层是通过GCD实现的。
-##NSOperation相关知识点
-###NSOperation QueueNSOperation与GCD类似，一般的使用方法都是把要实现的任务enqueue到相应的Qu">
+<meta name="description" content="NSOperation是iOS开发中实现多线程的一种简便方式，它与GCD类似也是不需要开发者手动管理线程，只需要关注要实现的task即可。NSOperation属于CocoTouch框架，是面向对象的，它的底层是通过GCD实现的。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="窥探NSOperation">
 <meta property="og:url" content="http://nerdfooprogrammer.github.io/2016/01/25/窥探NSOperation/index.html">
 <meta property="og:site_name" content="NerdFooProgrammer's blog">
-<meta property="og:description" content="NSOperation是iOS开发中实现多线程的一种简便方式，它与GCD类似也是不需要开发者手动管理线程，只需要关注要实现的task。NSOperation属于CocoTouch框架，是面向对象的，它的底层是通过GCD实现的。
-##NSOperation相关知识点
-###NSOperation QueueNSOperation与GCD类似，一般的使用方法都是把要实现的任务enqueue到相应的Qu">
+<meta property="og:description" content="NSOperation是iOS开发中实现多线程的一种简便方式，它与GCD类似也是不需要开发者手动管理线程，只需要关注要实现的task即可。NSOperation属于CocoTouch框架，是面向对象的，它的底层是通过GCD实现的。">
 <meta property="og:image" content="http://7xqh3q.com1.z0.glb.clouddn.com/NSOperation.png">
-<meta property="og:updated_time" content="2016-01-25T15:21:59.000Z">
+<meta property="og:updated_time" content="2016-01-25T15:24:07.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="窥探NSOperation">
-<meta name="twitter:description" content="NSOperation是iOS开发中实现多线程的一种简便方式，它与GCD类似也是不需要开发者手动管理线程，只需要关注要实现的task。NSOperation属于CocoTouch框架，是面向对象的，它的底层是通过GCD实现的。
-##NSOperation相关知识点
-###NSOperation QueueNSOperation与GCD类似，一般的使用方法都是把要实现的任务enqueue到相应的Qu">
+<meta name="twitter:description" content="NSOperation是iOS开发中实现多线程的一种简便方式，它与GCD类似也是不需要开发者手动管理线程，只需要关注要实现的task即可。NSOperation属于CocoTouch框架，是面向对象的，它的底层是通过GCD实现的。">
 
 
 
@@ -251,17 +245,16 @@
       
 
       
-        <span itemprop="articleBody"><p>NSOperation是iOS开发中实现多线程的一种简便方式，它与GCD类似也是不需要开发者手动管理线程，只需要关注要实现的task。NSOperation属于CocoTouch框架，是面向对象的，它的底层是通过GCD实现的。</p>
-<p>##NSOperation相关知识点</p>
-<p>###NSOperation Queue<br>NSOperation与GCD类似，一般的使用方法都是把要实现的任务enqueue到相应的Queue中，Queue会管理相关的线程，然后任务就会执行。可以通过<code>[NSOperationQueue mainQueue]</code>或者标准的两段式<code>[NSOperationQueue alloc] init]</code>来创建。</p>
-<p>###串行队列or并行队列<br>可以通过<code>maxConcurrentOperationCount</code>设置队列属性，当<code>maxConcurrentOperationCount＝ 1</code> 是为串行队列，其它则为并行队列。</p>
-<p>###队列优先级<br>在iOS8以后可以设置队列的优先级，让重要的事情优先执行，队列的优先级是通过<code>NSQualityOfService qualityOfService</code>来设置，主要有4个级别，从高到低为：NSQualityOfServiceUserInteractive、NSQualityOfServiceUserInitiated、NSQualityOfServiceUtility和NSQualityOfServiceBackground。</p>
-<p>###NSOperation类<br>NSOperation是一个Abstract Class，它定义了基本的接口，不能直接使用，好在Foundation为我们提供了2个concrete subclass，分别为NSBlockOperation和NSInvocationOperation。类继承关系如下图所示：<img src="http://7xqh3q.com1.z0.glb.clouddn.com/NSOperation.png" alt="NSOperaion"></p>
+        <span itemprop="articleBody"><p>NSOperation是iOS开发中实现多线程的一种简便方式，它与GCD类似也是不需要开发者手动管理线程，只需要关注要实现的task即可。NSOperation属于CocoTouch框架，是面向对象的，它的底层是通过GCD实现的。<a id="more"></a></p>
+<h2 id="NSOperation_u76F8_u5173_u77E5_u8BC6_u70B9"><a href="#NSOperation_u76F8_u5173_u77E5_u8BC6_u70B9" class="headerlink" title="NSOperation相关知识点"></a>NSOperation相关知识点</h2><h3 id="NSOperation_Queue"><a href="#NSOperation_Queue" class="headerlink" title="NSOperation Queue"></a>NSOperation Queue</h3><p>NSOperation与GCD类似，一般的使用方法都是把要实现的任务enqueue到相应的Queue中，Queue会管理相关的线程，然后任务就会执行。可以通过<code>[NSOperationQueue mainQueue]</code>或者标准的两段式<code>[NSOperationQueue alloc] init]</code>来创建。</p>
+<h3 id="u4E32_u884C_u961F_u5217or_u5E76_u884C_u961F_u5217"><a href="#u4E32_u884C_u961F_u5217or_u5E76_u884C_u961F_u5217" class="headerlink" title="串行队列or并行队列"></a>串行队列or并行队列</h3><p>可以通过<code>maxConcurrentOperationCount</code>设置队列属性，当<code>maxConcurrentOperationCount＝ 1</code> 是为串行队列，其它则为并行队列。</p>
+<h3 id="u961F_u5217_u4F18_u5148_u7EA7"><a href="#u961F_u5217_u4F18_u5148_u7EA7" class="headerlink" title="队列优先级"></a>队列优先级</h3><p>在iOS8以后可以设置队列的优先级，让重要的事情优先执行，队列的优先级是通过<code>NSQualityOfService qualityOfService</code>来设置，主要有4个级别，从高到低为：NSQualityOfServiceUserInteractive、NSQualityOfServiceUserInitiated、NSQualityOfServiceUtility和NSQualityOfServiceBackground。</p>
+<h3 id="NSOperation_u7C7B"><a href="#NSOperation_u7C7B" class="headerlink" title="NSOperation类"></a>NSOperation类</h3><p>NSOperation是一个Abstract Class，它定义了基本的接口，不能直接使用，好在Foundation为我们提供了2个concrete subclass，分别为NSBlockOperation和NSInvocationOperation。类继承关系如下图所示：<img src="http://7xqh3q.com1.z0.glb.clouddn.com/NSOperation.png" alt="NSOperaion"></p>
 <p>NSOperation也定义了开始方法<code>start</code>和任务方法<code>main</code>，但一般都不会用到，平常真正使用的是NSBlockOperation和NSInvocationOperation。</p>
-<p>###NSBlockOperation&amp;NSInvocationOperaion<br>NSBlockOperaion是通过Block的形势定义任务，例如创建NSBlockOperaion的API为:<br><code>+ (instancetype)blockOperationWithBlock:(void (^)(void))block;</code>;<br>NSInvocationOperaion是标准的target－selector，创建的API为<br><code>- (nullable instancetype)initWithTarget:(id)target selector:(SEL)sel object:(nullable id)arg;</code></p>
-<p>###NSOperation状态管理<br>NSOperation可以通过<code>cancelled</code>、<code>executing</code>、<code>finished</code>、<code>ready</code>来查询当前的任务运行状态，上述状态都是通过KVO实现的。取消任务需调用<code>cancel</code>接口。</p>
-<p>###NSOperation优先级<br>NSOperaion可以通过<code>NSOperationQueuePriority queuePriority</code>来指定某个Operaion在Queue中执行的优先级。</p>
-<p>###任务依赖<br>当任务A依赖任务B时，用NSOperation实现时最方便的，伪代码如下：</p>
+<h3 id="NSBlockOperation_26amp_3BNSInvocationOperaion"><a href="#NSBlockOperation_26amp_3BNSInvocationOperaion" class="headerlink" title="NSBlockOperation&amp;NSInvocationOperaion"></a>NSBlockOperation&amp;NSInvocationOperaion</h3><p>NSBlockOperaion是通过Block的形势定义任务，例如创建NSBlockOperaion的API为:<br><code>+ (instancetype)blockOperationWithBlock:(void (^)(void))block;</code>;<br>NSInvocationOperaion是标准的target－selector，创建的API为<br><code>- (nullable instancetype)initWithTarget:(id)target selector:(SEL)sel object:(nullable id)arg;</code></p>
+<h3 id="NSOperation_u72B6_u6001_u7BA1_u7406"><a href="#NSOperation_u72B6_u6001_u7BA1_u7406" class="headerlink" title="NSOperation状态管理"></a>NSOperation状态管理</h3><p>NSOperation可以通过<code>cancelled</code>、<code>executing</code>、<code>finished</code>、<code>ready</code>来查询当前的任务运行状态，上述状态都是通过KVO实现的。取消任务需调用<code>cancel</code>接口。</p>
+<h3 id="NSOperation_u4F18_u5148_u7EA7"><a href="#NSOperation_u4F18_u5148_u7EA7" class="headerlink" title="NSOperation优先级"></a>NSOperation优先级</h3><p>NSOperaion可以通过<code>NSOperationQueuePriority queuePriority</code>来指定某个Operaion在Queue中执行的优先级。</p>
+<h3 id="u4EFB_u52A1_u4F9D_u8D56"><a href="#u4EFB_u52A1_u4F9D_u8D56" class="headerlink" title="任务依赖"></a>任务依赖</h3><p>当任务A依赖任务B时，用NSOperation实现时最方便的，伪代码如下：</p>
 <pre><code>//先执行B Operation，后执行A Operation
 NSBlockOperation *A = [NSBlockOperation blockOperationWithBlock:^{
     NSLog(@&quot;A Operation!!!!&quot;);
@@ -271,8 +264,7 @@ NSBlockOperation *B = [NSBlockOperation blockOperationWithBlock:^{
     NSLog(@&quot;B Operation!!!!&quot;);
 }];
 [A addDependency:B];
-</code></pre><p>##NSOperaion与GCD区别</p>
-<ol>
+</code></pre><h2 id="NSOperaion_u4E0EGCD_u533A_u522B"><a href="#NSOperaion_u4E0EGCD_u533A_u522B" class="headerlink" title="NSOperaion与GCD区别"></a>NSOperaion与GCD区别</h2><ol>
 <li>NSOperation是对象而GCD是C的API</li>
 <li>NSOperaion可以方便地查看某个任务的运行状态且可以任务取消Queue中的任务，但GCD却不行</li>
 <li>NSOperationQueue可以设置priority而Dispatch Queue不行</li>
@@ -431,7 +423,7 @@ NSBlockOperation *B = [NSBlockOperation blockOperationWithBlock:^{
               
             
             
-              <p class="post-toc-empty">此文章未包含目录</p>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#NSOperation_u76F8_u5173_u77E5_u8BC6_u70B9"><span class="nav-number">1.</span> <span class="nav-text">NSOperation相关知识点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#NSOperation_Queue"><span class="nav-number">1.1.</span> <span class="nav-text">NSOperation Queue</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u4E32_u884C_u961F_u5217or_u5E76_u884C_u961F_u5217"><span class="nav-number">1.2.</span> <span class="nav-text">串行队列or并行队列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u961F_u5217_u4F18_u5148_u7EA7"><span class="nav-number">1.3.</span> <span class="nav-text">队列优先级</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NSOperation_u7C7B"><span class="nav-number">1.4.</span> <span class="nav-text">NSOperation类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NSBlockOperation_26amp_3BNSInvocationOperaion"><span class="nav-number">1.5.</span> <span class="nav-text">NSBlockOperation&NSInvocationOperaion</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NSOperation_u72B6_u6001_u7BA1_u7406"><span class="nav-number">1.6.</span> <span class="nav-text">NSOperation状态管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NSOperation_u4F18_u5148_u7EA7"><span class="nav-number">1.7.</span> <span class="nav-text">NSOperation优先级</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u4EFB_u52A1_u4F9D_u8D56"><span class="nav-number">1.8.</span> <span class="nav-text">任务依赖</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NSOperaion_u4E0EGCD_u533A_u522B"><span class="nav-number">2.</span> <span class="nav-text">NSOperaion与GCD区别</span></a></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator">
