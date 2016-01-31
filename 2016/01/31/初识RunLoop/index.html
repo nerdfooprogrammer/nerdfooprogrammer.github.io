@@ -59,10 +59,10 @@
 <meta property="og:url" content="http://nerdfooprogrammer.github.io/2016/01/31/初识RunLoop/index.html">
 <meta property="og:site_name" content="NerdFooProgrammer's blog">
 <meta property="og:description" content="RunLoop是一个与线程相关的非常基础的功能，正如名字所说的那样它是一个事件处理循环，用于调度和和协调接收到的事件，RunLoop的目的就是让线程在有任务的时候busy，在没任务的时候sleep。RunLoop的管理不是全部自动的，你必需在适当的时机让你的线程启动RunLoop以及响应事件。Cocoa和Cocoa Foundation提供了RunLoop对象用来管理线程的RunLoop，你的应用">
-<meta property="og:image" content="http://7xqh3q.com1.z0.glb.clouddn.com/RunLoop%27s%20Structure.pngRunLoop%E2%80%98s%20Structure.png =320x160">
-<meta property="og:image" content="http://7xqh3q.com1.z0.glb.clouddn.com/RunLoop%27s%20ModeRunLoop%27s%20Mode.png =640x320">
-<meta property="og:image" content="http://7xqh3q.com1.z0.glb.clouddn.com/RunLoop%27s%20OrderRunLoop%27s%20Order.png =480x720">
-<meta property="og:updated_time" content="2016-01-31T16:40:15.000Z">
+<meta property="og:image" content="http://7xqh3q.com1.z0.glb.clouddn.com/RunLoop%27s%20Structure.pngRunLoop%E2%80%98s%20Structure.png">
+<meta property="og:image" content="http://7xqh3q.com1.z0.glb.clouddn.com/RunLoop%27s%20ModeRunLoop%27s%20Mode.png">
+<meta property="og:image" content="http://7xqh3q.com1.z0.glb.clouddn.com/RunLoop%27s%20OrderRunLoop%27s%20Order.png">
+<meta property="og:updated_time" content="2016-01-31T16:46:59.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="初识RunLoop">
 <meta name="twitter:description" content="RunLoop是一个与线程相关的非常基础的功能，正如名字所说的那样它是一个事件处理循环，用于调度和和协调接收到的事件，RunLoop的目的就是让线程在有任务的时候busy，在没任务的时候sleep。RunLoop的管理不是全部自动的，你必需在适当的时机让你的线程启动RunLoop以及响应事件。Cocoa和Cocoa Foundation提供了RunLoop对象用来管理线程的RunLoop，你的应用">
@@ -260,7 +260,7 @@
     }while (condition);
 }
 </code></pre><p>RunLoop处理两类事件，一类为<strong>输入事件</strong>(异步投递，经常来自其他线程),输入事件主要包括端口（网口、蓝牙）、自定义、performSelector；另一类为<strong>定时器</strong>（同步投递，产生于内部时钟调度）。另外为了处理输入源，RunLoop也会在某些时刻发送一些通知，让观察者们进行一些额外的处理，RunLoop的整体结构如下图所示：</p>
-<p><img src="http://7xqh3q.com1.z0.glb.clouddn.com/RunLoop%27s%20Structure.pngRunLoop%E2%80%98s%20Structure.png =320x160" alt="RunLoop的结构和输入源"></p>
+<p><img src="http://7xqh3q.com1.z0.glb.clouddn.com/RunLoop%27s%20Structure.pngRunLoop%E2%80%98s%20Structure.png" alt="RunLoop的结构和输入源"></p>
 <h2 id="RunLoop_u521B_u5EFA"><a href="#RunLoop_u521B_u5EFA" class="headerlink" title="RunLoop创建"></a>RunLoop创建</h2><p>Cocoa框架不能显示地创建RunLoop对象，只需掉用相关API获取即可，示例代码如下：</p>
 <pre><code>//获取当前线程的RunLoop（相当于创建RunLoop）
 [NSRunLoop currentRunLoop];
@@ -269,10 +269,10 @@
 </code></pre><h2 id="RunLoop_u8FD0_u884C"><a href="#RunLoop_u8FD0_u884C" class="headerlink" title="RunLoop运行"></a>RunLoop运行</h2><p>NSRunLoop类提供了3个API启动RunLoop，其本质都是调用<code>- (BOOL)runMode:(NSString *)mode beforeDate:(NSDate *)limitDate;</code>示例代码如下：</p>
 <pre><code>[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
 </code></pre><h2 id="RunLoop_u8FD0_u884C_u6A21_u5F0F"><a href="#RunLoop_u8FD0_u884C_u6A21_u5F0F" class="headerlink" title="RunLoop运行模式"></a>RunLoop运行模式</h2><p>RunLoop Mode是一个用来监听输入源和Time以及用于通知观察者的集合，每当你运行你的RunLoop时需要指定一个特定的Mode，一个RunLoop有多个Mode。只有在相关联的Mode下输入源和Timer才会被监听，一般事件都运行在<code>NSDefaultRunLoopMode</code>下,详细的模式及说明见下图所示：</p>
-<p><img src="http://7xqh3q.com1.z0.glb.clouddn.com/RunLoop%27s%20ModeRunLoop%27s%20Mode.png =640x320" alt="RunLoop Mode"></p>
+<p><img src="http://7xqh3q.com1.z0.glb.clouddn.com/RunLoop%27s%20ModeRunLoop%27s%20Mode.png" alt="RunLoop Mode"></p>
 <p>这里需要注意的地方是：一般在主线程添加timer默认都运行在<code>NSDefaultRunLoopMode</code>下，而用户操作事件比如滑动ScrollView时RunLoop会优先运行在<code>NSEventTranckingRunLoopMode</code>下，就会导致Timer不运行。<strong>解决办法：把Timer添加到<code>NSRunLoopCommonModes</code>下</strong>。</p>
 <h2 id="RunLoop_u4E8B_u4EF6_u987A_u5E8F"><a href="#RunLoop_u4E8B_u4EF6_u987A_u5E8F" class="headerlink" title="RunLoop事件顺序"></a>RunLoop事件顺序</h2><p>每次运行RunLoop，RunLoop都会处理挂起事件和给相关的Observer产生通知，每一个步骤都是特定的，执行顺序如下图所示：</p>
-<p><img src="http://7xqh3q.com1.z0.glb.clouddn.com/RunLoop%27s%20OrderRunLoop%27s%20Order.png =480x720" alt="RunLoop执行顺序"></p>
+<p><img src="http://7xqh3q.com1.z0.glb.clouddn.com/RunLoop%27s%20OrderRunLoop%27s%20Order.png" alt="RunLoop执行顺序"></p>
 <h2 id="RunLoop_u6DFB_u52A0_u4E8B_u4EF6_u6E90"><a href="#RunLoop_u6DFB_u52A0_u4E8B_u4EF6_u6E90" class="headerlink" title="RunLoop添加事件源"></a>RunLoop添加事件源</h2><p>创建好RunLoop后，需要至少向RunLoop添加一个待监听的事件，否则RunLoop会直接退出。<code>AFNetworing</code>的RunLoop中就添加了无用的事件，主要目的就是不让RunLoop直接退出，具体代码如下：</p>
 <pre><code>+ (void)networkRequestThreadEntryPoint:(id)__unused object {
     @autoreleasepool {
