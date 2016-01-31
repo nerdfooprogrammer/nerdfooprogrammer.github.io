@@ -212,6 +212,94 @@
             
               
                 
+                <a class="post-title-link" href="/2016/01/31/初识RunLoop/" itemprop="url">
+                  初识RunLoop
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            发表于
+            <time itemprop="dateCreated" datetime="2016-01-31T19:22:49+08:00" content="2016-01-31">
+              2016-01-31
+            </time>
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/01/31/初识RunLoop/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/01/31/初识RunLoop/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body">
+
+      
+      
+
+      
+        
+          <p>RunLoop是一个与线程相关的非常基础的功能，正如名字所说的那样它是一个事件处理循环，用于调度和和协调接收到的事件，<strong>RunLoop的目的就是让线程在有任务的时候busy，在没任务的时候sleep。</strong><br>RunLoop的管理不是全部自动的，你必需在适当的时机让你的线程启动RunLoop以及响应事件。Cocoa和Cocoa Foundation提供了RunLoop对象用来管理线程的RunLoop，你的应用不必显示地创建RunLoop对象，每个线程包括主线程都有一个关联的RunLoop对象，只有副线程需要显示地运行RunLoop（主线程的创建运行都是app框架自动完成的）。下面主要从RunLoop的构成、创建、运行、模式、事件执行顺序、添加事件源、停止方面来讲解。
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/01/31/初识RunLoop/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/01/25/窥探NSOperation/" itemprop="url">
                   窥探NSOperation
                 </a>
@@ -674,7 +762,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">5</span>
+              <span class="site-state-item-count">6</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
