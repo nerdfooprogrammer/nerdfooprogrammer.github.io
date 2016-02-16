@@ -35,7 +35,7 @@
 <link href="/css/main.css?v=0.4.5.2" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="block," />
+  <meta name="keywords" content="Hexo, NexT" />
 
 
 
@@ -53,16 +53,32 @@
 
 
 
-<meta name="description" content="Block是iOS4引入的功能，灵活运用Block可使代码简洁易读，本文通过Block是什么、Block和函数的区别以及__block的意义等方面展开讲解。">
+<meta name="description" content="进度条（ProgressBar）估计在每个App中都会使用到，再加上最近学习完了CoreAnimation框架，故而想自己实现一款进度条玩玩。
+进度条其实就是绘制一条线的过程，重点就是怎么让绘制线的过程“动”起来，要想“动”就需要用到CoreAnimation框架了，用CoreAnimation实现动画的过程主要分3步：
+
+创建动画Path、CALayer；
+创建合适的CAAnimation;
+把">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Objective-C之Block二三事">
-<meta property="og:url" content="http://nerdfooprogrammer.github.io/2016/01/04/Objective-C之block二三事/index.html">
+<meta property="og:title" content="估计是史上最简单的自定义进度条实现">
+<meta property="og:url" content="http://nerdfooprogrammer.github.io/2016/02/16/估计是史上最简单的自定义进度条实现/index.html">
 <meta property="og:site_name" content="NerdFooProgrammer's blog">
-<meta property="og:description" content="Block是iOS4引入的功能，灵活运用Block可使代码简洁易读，本文通过Block是什么、Block和函数的区别以及__block的意义等方面展开讲解。">
-<meta property="og:updated_time" content="2016-01-19T14:44:52.000Z">
+<meta property="og:description" content="进度条（ProgressBar）估计在每个App中都会使用到，再加上最近学习完了CoreAnimation框架，故而想自己实现一款进度条玩玩。
+进度条其实就是绘制一条线的过程，重点就是怎么让绘制线的过程“动”起来，要想“动”就需要用到CoreAnimation框架了，用CoreAnimation实现动画的过程主要分3步：
+
+创建动画Path、CALayer；
+创建合适的CAAnimation;
+把">
+<meta property="og:image" content="http://7xqh3q.com1.z0.glb.clouddn.com/progress.gif">
+<meta property="og:updated_time" content="2016-02-16T16:51:44.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Objective-C之Block二三事">
-<meta name="twitter:description" content="Block是iOS4引入的功能，灵活运用Block可使代码简洁易读，本文通过Block是什么、Block和函数的区别以及__block的意义等方面展开讲解。">
+<meta name="twitter:title" content="估计是史上最简单的自定义进度条实现">
+<meta name="twitter:description" content="进度条（ProgressBar）估计在每个App中都会使用到，再加上最近学习完了CoreAnimation框架，故而想自己实现一款进度条玩玩。
+进度条其实就是绘制一条线的过程，重点就是怎么让绘制线的过程“动”起来，要想“动”就需要用到CoreAnimation框架了，用CoreAnimation实现动画的过程主要分3步：
+
+创建动画Path、CALayer；
+创建合适的CAAnimation;
+把">
 
 
 
@@ -74,7 +90,7 @@
   };
 </script>
 
-  <title> Objective-C之Block二三事 | NerdFooProgrammer's blog </title>
+  <title> 估计是史上最简单的自定义进度条实现 | NerdFooProgrammer's blog </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -204,7 +220,7 @@
             
             
               
-                Objective-C之Block二三事
+                估计是史上最简单的自定义进度条实现
               
             
           </h1>
@@ -213,8 +229,8 @@
         <div class="post-meta">
           <span class="post-time">
             发表于
-            <time itemprop="dateCreated" datetime="2016-01-04T22:56:58+08:00" content="2016-01-04">
-              2016-01-04
+            <time itemprop="dateCreated" datetime="2016-02-16T23:03:54+08:00" content="2016-02-16">
+              2016-02-16
             </time>
           </span>
 
@@ -224,8 +240,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/01/04/Objective-C之block二三事/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/01/04/Objective-C之block二三事/" itemprop="commentsCount"></span>
+                <a href="/2016/02/16/估计是史上最简单的自定义进度条实现/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/02/16/估计是史上最简单的自定义进度条实现/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -244,184 +260,82 @@
       
 
       
-        <span itemprop="articleBody"><p>  Block是iOS4引入的功能，灵活运用Block可使代码简洁易读，本文通过Block是什么、Block和函数的区别以及__block的意义等方面展开讲解。<a id="more"></a></p>
-<h2 id="u4E00_u3001Block_u662F_u4EC0_u4E48"><a href="#u4E00_u3001Block_u662F_u4EC0_u4E48" class="headerlink" title="一、Block是什么"></a>一、Block是什么</h2><p>  Block是能自动截取自动变量的匿名函数，其本质是Objective-C的对象。想要了解Block的本质需要借助clang 的－rewrite-objc(将Objective-C代码转换成C++)命令，假设Objective-C的Block代码如下：</p>
-<pre><code>#include&quot;stdio.h&quot;
-int main()
-{    
-    int val = 10;
-        void (^blk)(void) = ^{
-    printf(&quot;val = %d\n&quot;,val);
-    };
-    blk();
-    return 0;
-}
-</code></pre><p>经过－rewrite-objc转换后变成如下的C＋＋代码:</p>
-<pre><code>//描述Block最小单元，主要成员是void *FuncPtr,指向Block代表的匿名函数。
-struct __block_impl {
-  void *isa;
-  int Flags;
-  int Reserved;
-  void *FuncPtr;
-};
-
-//该结构体即代表Block,结构体中int val就是自动截取的变量（初始化时用Block中需要访问的值来赋值），struct __block_impl中最主要的就是void *FuncPtr，用来指向Block代表的匿名函数。
-struct __main_block_impl_0 {
-  struct __block_impl impl;
-  struct __main_block_desc_0* Desc;
-  int val;
-  __main_block_impl_0(void *fp, struct __main_block_desc_0 *desc, int _val, int flags=0) : val(_val) {
-    impl.isa = &amp;_NSConcreteStackBlock;
-    impl.Flags = flags;
-    impl.FuncPtr = fp;
-    Desc = desc;
-  }
-};
-
-//Block代表的匿名函数，即本文中的“printf(&quot;val = %d\n&quot;,val);”
-static void __main_block_func_0(struct __main_block_impl_0 *__cself) {
-  int val = __cself-&gt;val; // bound by copy
-
- printf(&quot;val = %d\n&quot;,val);
-    }
-
-static struct __main_block_desc_0 {
-  size_t reserved;
-  size_t Block_size;
-} __main_block_desc_0_DATA = { 0, sizeof(struct __main_block_impl_0)};
-
-int main()
-{
-    int val = 10;
-    //Block定义
-     void (*blk)(void) = ((void (*)())&amp;__main_block_impl_0((void *)__main_block_func_0, &amp;__main_block_desc_0_DATA, val));
-     //Block调用
-    ((void (*)(__block_impl *))((__block_impl *)blk)-&gt;FuncPtr)((__block_impl *)blk);
-    return 0;
-}
-</code></pre><p>从上面可以看出<code>Block</code>转变成了<code>struct __main_block_impl_0</code>，自动截获的<code>val</code>也变成了结构体的成员变量，然后在结构体的构造函数中用需要截获的变量值进行初始化。至此可以清晰地看出<code>Blcok</code>的本质是<code>struct</code>,是Objective-C的对象。</p>
-<h2 id="u4E8C_u3001Block_u548C_u51FD_u6570_u7684_u533A_u522B"><a href="#u4E8C_u3001Block_u548C_u51FD_u6570_u7684_u533A_u522B" class="headerlink" title="二、Block和函数的区别"></a>二、Block和函数的区别</h2><ul>
-<li>静态与动态</li>
-</ul>
-<p>Block是Objective－C对象，既然是对象，那么就是运行时的产物，只有运行的时候才能确定；而函数代表的是地址，它是静态的，在编译器就确定了。所以Block与函数最大的区别就是产生的时机不同。</p>
+        <span itemprop="articleBody"><p>进度条（ProgressBar）估计在每个App中都会使用到，再加上最近学习完了CoreAnimation框架，故而想自己实现一款进度条玩玩。</p>
+<p>进度条其实就是绘制一条线的过程，重点就是怎么让绘制线的过程“动”起来，要想“动”就需要用到CoreAnimation框架了，用CoreAnimation实现动画的过程主要分3步：</p>
+<ol>
+<li>创建动画Path、CALayer；</li>
+<li>创建合适的CAAnimation;</li>
+<li><p>把CAAnimation添加到想要动画的CALayer上。</p>
+<a id="more"></a>
+<p>下面就依照这3个步骤逐步实现我们的进度条。</p>
+<h3 id="u521B_u5EFA_u52A8_u753BPath_u3001CALayer"><a href="#u521B_u5EFA_u52A8_u753BPath_u3001CALayer" class="headerlink" title="创建动画Path、CALayer"></a>创建动画Path、CALayer</h3><p>iOS中画路径最简单的就是用<code>UIBezierPath</code>实现(本文只需要画一条线)，因为要实现进度条所以layer最好选用<code>CAShapeLayer</code>(因为CAShapeLayer有个strokeStart和strokeEnd属性非常方便用作进度条动画)，再者进度条需要有前景色和背景色所以需要创建2个<code>CAShapeLayer</code>，相关伪代码如下：</p>
+<p> @implementation NFPProgressView<br> {</p>
+<pre><code>//Layer
+CAShapeLayer *progressLayer;
+//backgroundLayer
+CAShapeLayer *backgroundLayer;
+UIBezierPath *progressPath;
+</code></pre><p> }</p>
 <ul>
-<li>嵌套定义</li>
+<li>(instancetype)initWithFrame:(CGRect)frame<br>{<br>  self = [super initWithFrame:frame];<br>  if(self)<br>  {<pre><code>//Path
+progressPath = [UIBezierPath bezierPath];
+[progressPath moveToPoint:CGPointMake(PROGRESSHEIGHT/2,frame.size.height/2)];
+[progressPath addLineToPoint:CGPointMake(frame.size.width-PROGRESSHEIGHT/2,frame.size.height/2)];
+//Layer
+progressLayer = [CAShapeLayer layer];
+progressLayer.path = progressPath.CGPath;
+progressLayer.lineWidth = PROGRESSHEIGHT;
+progressLayer.lineCap = kCALineCapRound;
+progressLayer.strokeColor = [UIColor redColor].CGColor;
+backgroundLayer = [CAShapeLayer layer];
+backgroundLayer.path = progressPath.CGPath;
+backgroundLayer.strokeColor = [UIColor greenColor].CGColor;
+backgroundLayer.lineWidth = PROGRESSHEIGHT;
+backgroundLayer.lineCap = kCALineCapRound;
+[self.layer addSublayer:backgroundLayer];
+[self.layer addSublayer:progressLayer];
+self.progress = 0.0;
+</code></pre>  }<br>  return self;<br>}</li>
 </ul>
-<p>Block可以嵌套定义，比如:</p>
-<pre><code>void main()
+</li>
+</ol>
+<h3 id="u521B_u5EFA_u5408_u9002_u7684CAAnimation"><a href="#u521B_u5EFA_u5408_u9002_u7684CAAnimation" class="headerlink" title="创建合适的CAAnimation"></a>创建合适的CAAnimation</h3><p>因进度条动画只有2帧（start、end）所以选用<code>CABasicAnimation</code>,创建时KeyPath设置为“strokeEnd”，创建动画的<code>animationWithKeyPath:</code>方法其本质上是KVO，也就是它会监听KeyPath的变化。至于KeyPath可以设置为哪些属性，CALayer中那些描述为<strong>Animatable</strong>的属性均可以（当然我们还可以自定义，但需要实现一系列的方法，needsDisplayForKey：、display之类的），比如path、lineWidth。以下是创建CAAnimation的伪代码：</p>
+<pre><code>CABasicAnimation *progressAnimation = [CABasicAnimation animationWithKeyPath:@&quot;strokeEnd&quot;];
+progressAnimation.duration = 0.5f;
+</code></pre><h3 id="u628ACAAnimation_u6DFB_u52A0_u5230_u60F3_u8981_u52A8_u753B_u7684CALayer_u4E0A"><a href="#u628ACAAnimation_u6DFB_u52A0_u5230_u60F3_u8981_u52A8_u753B_u7684CALayer_u4E0A" class="headerlink" title="把CAAnimation添加到想要动画的CALayer上"></a>把CAAnimation添加到想要动画的CALayer上</h3><p>这一步非常简单，只需把之前创建好的CAAnimation添加到之前创建好的CALayer上即可，伪代码如下：</p>
+<pre><code>[progressLayer addAnimation:progressAnimation forKey:@&quot;progress&quot;];
+</code></pre><h3 id="u626B_u5C3E_u5DE5_u4F5C"><a href="#u626B_u5C3E_u5DE5_u4F5C" class="headerlink" title="扫尾工作"></a>扫尾工作</h3><p>到这一步时进度条主要的功能就已实现了，就剩下进度条前景色、背景色的设置这类属性的设置了，关于这些属性的设置只需要重写setter方法即可，伪代码如下：<br>    @interface NFPProgressView : UIView<br>    @property(nonatomic,strong) UIColor <em>tintColor;<br>    @property(nonatomic,strong) UIColor </em>trackColor;<br>    @end</p>
+<pre><code>@implementation NFPProgressView
+- (void)setTintColor:(UIColor *)tintColor
 {
-    void (^externalBlock)(void) = ^(void){
-        void(^internalBlock)(void) = ^(void){
-            NSLog(@&quot;internalBlock&quot;);
-        };
-        internalBlock();
-    };
-    externalBlock();
+    progressLayer.strokeColor = tintColor.CGColor;
 }
-</code></pre><p>但函数却不能嵌套定义，比如你不能编写这样的函数：</p>
-<pre><code>void main()
+
+- (void)setTrackColor:(UIColor *)trackColor
 {
-    void fun1(void)
-    {
-        void fun2(void);
-        {
-            printf(&quot;fun2&quot;);
-        }
-        fun2();
-    }
+    backgroundLayer.strokeColor = trackColor.CGColor;
 }
-</code></pre><h2 id="u4E09_u3001__block_u4FEE_u9970_u7B26_u7684_u542B_u4E49"><a href="#u4E09_u3001__block_u4FEE_u9970_u7B26_u7684_u542B_u4E49" class="headerlink" title="三、__block修饰符的含义"></a>三、__block修饰符的含义</h2><p>当我们想要在Block内部修改某个<strong>自动局部变量</strong>时,必须在自动局部变量前加上__block修饰符。那么大家想过为什么一定要加__block呢，不加__block为什么就不能修改呢？想要回答这写问题可以从本文的第一小节入手。<br>在第一小节中自动局部变量<code>val</code>经过编译器转换后变成<code>struct __main_block_impl_0</code>中个一个成员<code>int val</code>，然后在<code>struct __main_block_impl_0</code>的构造函数中用截获的自动变量<code>_val</code>的值初始化<code>struct __main_block_impl_0</code>的成员<code>int val</code>，从整个构造过程可以看出<code>val</code>是值传递而不是引用传递，所以在Block中是修改不了Block外部的自动变量的值，这个问题就好比如大家都学过的swap函数，要想能交换两个变量的值，swap函数的形参必须是地址。<br>那么增加__block修饰符变换后的C++代码是什么样子呢？我们依然用clang 的－rewrite-objc命令，假设Block源码为：</p>
-<pre><code>#include&quot;stdio.h&quot;
-int main()
-{    
-    __block int val = 10;
-        void (^blk)(void) = ^{
-            val = 11;
-            printf(&quot;val = %d\n&quot;,val);
-    };
-    blk();
-    return 0;
-}
-</code></pre><p>转换后变成：</p>
-<pre><code>//__block修改的自动变量变成了一个struct，然后struct中有一个成员保存自动变量的值
-struct __Block_byref_val_0 {
-  void *__isa;
-__Block_byref_val_0 *__forwarding;
- int __flags;
- int __size;
- int val;
-};
-
-//从构造函数可以看出用__block修饰的变量是用引用传递的，故而能修改外部自动变量的值
-struct __main_block_impl_0 {
-  struct __block_impl impl;
-  struct __main_block_desc_0* Desc;
-  __Block_byref_val_0 *val; // by ref
-  __main_block_impl_0(void *fp, struct __main_block_desc_0 *desc, __Block_byref_val_0 *_val, int flags=0) : val(_val-&gt;__forwarding) {
-    impl.isa = &amp;_NSConcreteStackBlock;
-    impl.Flags = flags;
-    impl.FuncPtr = fp;
-    Desc = desc;
-  }
-};
-
-static void __main_block_func_0(struct __main_block_impl_0 *__cself) {
-  __Block_byref_val_0 *val = __cself-&gt;val; // bound by ref
-
-         (val-&gt;__forwarding-&gt;val) = 11;
-         printf(&quot;val = %d\n&quot;,(val-&gt;__forwarding-&gt;val));
-    }
-
-static void __main_block_copy_0(struct __main_block_impl_0*dst, struct __main_block_impl_0*src) {_Block_object_assign((void*)&amp;dst-&gt;val, (void*)src-&gt;val, 8/*BLOCK_FIELD_IS_BYREF*/);}
-
-static void __main_block_dispose_0(struct __main_block_impl_0*src) {_Block_object_dispose((void*)src-&gt;val, 8/*BLOCK_FIELD_IS_BYREF*/);}
-
-static struct __main_block_desc_0 {
-  size_t reserved;
-  size_t Block_size;
-  void (*copy)(struct __main_block_impl_0*, struct __main_block_impl_0*);
-  void (*dispose)(struct __main_block_impl_0*);
-} __main_block_desc_0_DATA = { 0, sizeof(struct __main_block_impl_0), __main_block_copy_0, __main_block_dispose_0};
-
-int main()
-{
-    __attribute__((__blocks__(byref))) __Block_byref_val_0 val = {(void*)0,(__Block_byref_val_0 *)&amp;val, 0, sizeof(__Block_byref_val_0), 10};
-     void (*blk)(void) = ((void (*)())&amp;__main_block_impl_0((void *)__main_block_func_0, &amp;__main_block_desc_0_DATA, (__Block_byref_val_0 *)&amp;val, 570425344));
-    ((void (*)(__block_impl *))((__block_impl *)blk)-&gt;FuncPtr)((__block_impl *)blk);
-    return 0;
-}
-</code></pre><p>从转换后的C++代码可以看出用<code>__block</code>修饰的变量最后变化成了一个<code>struct</code>，然后<code>struct</code>中有一个成员变量<code>val</code>存储着自动变量的值，一个成员<code>__forwarding</code>存储着外部变量的地址，犹如这行代码所说明的</p>
-<pre><code>__attribute__((__blocks__(byref))) __Block_byref_val_0 val = {(void*)0,(__Block_byref_val_0 *)&amp;val, 0, sizeof(__Block_byref_val_0), 10};
-</code></pre><p>在构造Block中时传递的是<code>(__Block_byref_val_0 *)&amp;val</code>,也就是说用__block修饰的变量是通过引用传递被Block所捕获的，所以可以在Block内部修改外面的自动局部变量。</p>
-<p><em>PS:想在Block内部修改Block外部的变量，除了用__block修饰符外，也可以把变量定义为<strong>静态局部变量、静态全局变量、全局变量</strong></em>。</p>
+@end
+</code></pre><h3 id="Demo_u6548_u679C"><a href="#Demo_u6548_u679C" class="headerlink" title="Demo效果"></a>Demo效果</h3><p>最终的Demo效果如下：</p>
+<p><img src="http://7xqh3q.com1.z0.glb.clouddn.com/progress.gif" alt="Progress"></p>
 </span>
       
     </div>
 
     <footer class="post-footer">
       
-        <div class="post-tags">
-          
-            <a href="/tags/block/" rel="tag">#block</a>
-          
-        </div>
-      
 
       
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/01/03/Singleton/" rel="next" title="Objective-C之严格单例模式正确实现">
-                <i class="fa fa-chevron-left"></i> Objective-C之严格单例模式正确实现
+              <a href="/2016/01/31/初识RunLoop/" rel="next" title="初识RunLoop">
+                <i class="fa fa-chevron-left"></i> 初识RunLoop
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/01/13/浅析GCD/" rel="prev" title="浅析GCD">
-                浅析GCD <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -448,8 +362,8 @@ int main()
         
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2016/01/04/Objective-C之block二三事/"
-           data-title="Objective-C之Block二三事" data-url="http://nerdfooprogrammer.github.io/2016/01/04/Objective-C之block二三事/">
+      <div class="ds-thread" data-thread-key="2016/02/16/估计是史上最简单的自定义进度条实现/"
+           data-title="估计是史上最简单的自定义进度条实现" data-url="http://nerdfooprogrammer.github.io/2016/02/16/估计是史上最简单的自定义进度条实现/">
       </div>
     
   </div>
@@ -556,7 +470,7 @@ int main()
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#u4E00_u3001Block_u662F_u4EC0_u4E48"><span class="nav-number">1.</span> <span class="nav-text">一、Block是什么</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#u4E8C_u3001Block_u548C_u51FD_u6570_u7684_u533A_u522B"><span class="nav-number">2.</span> <span class="nav-text">二、Block和函数的区别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#u4E09_u3001__block_u4FEE_u9970_u7B26_u7684_u542B_u4E49"><span class="nav-number">3.</span> <span class="nav-text">三、__block修饰符的含义</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#u521B_u5EFA_u52A8_u753BPath_u3001CALayer"><span class="nav-number">1.</span> <span class="nav-text">创建动画Path、CALayer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u521B_u5EFA_u5408_u9002_u7684CAAnimation"><span class="nav-number">2.</span> <span class="nav-text">创建合适的CAAnimation</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u628ACAAnimation_u6DFB_u52A0_u5230_u60F3_u8981_u52A8_u753B_u7684CALayer_u4E0A"><span class="nav-number">3.</span> <span class="nav-text">把CAAnimation添加到想要动画的CALayer上</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u626B_u5C3E_u5DE5_u4F5C"><span class="nav-number">4.</span> <span class="nav-text">扫尾工作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Demo_u6548_u679C"><span class="nav-number">5.</span> <span class="nav-text">Demo效果</span></a></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator">
