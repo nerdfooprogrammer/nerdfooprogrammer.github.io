@@ -70,7 +70,7 @@
 创建合适的CAAnimation;
 把">
 <meta property="og:image" content="http://7xqh3q.com1.z0.glb.clouddn.com/progress.gif">
-<meta property="og:updated_time" content="2016-02-17T14:50:06.000Z">
+<meta property="og:updated_time" content="2016-02-17T14:51:20.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="估计是史上最简单的自定义进度条实现">
 <meta name="twitter:description" content="进度条（ProgressBar）估计在每个App中都会使用到，再加上最近学习完了CoreAnimation框架，故而想自己实现一款进度条玩玩。
@@ -265,9 +265,9 @@
 <ol>
 <li>创建动画Path、CALayer；</li>
 <li>创建合适的CAAnimation;</li>
-<li>把CAAnimation添加到想要动画的CALayer上。<a id="more"></a>
-</li>
+<li>把CAAnimation添加到想要动画的CALayer上。</li>
 </ol>
+<a id="more"></a>
 <p>下面就依照这3个步骤逐步实现我们的进度条。</p>
 <h3 id="u521B_u5EFA_u52A8_u753BPath_u3001CALayer"><a href="#u521B_u5EFA_u52A8_u753BPath_u3001CALayer" class="headerlink" title="创建动画Path、CALayer"></a>创建动画Path、CALayer</h3><p>iOS中画路径最简单的就是用<code>UIBezierPath</code>实现(本文只需要画一条线)，因为要实现进度条所以layer最好选用<code>CAShapeLayer</code>(因为CAShapeLayer有个strokeStart和strokeEnd属性非常方便用作进度条动画)，再者进度条需要有前景色和背景色所以需要创建2个<code>CAShapeLayer</code>，相关伪代码如下：</p>
 <pre><code>@implementation NFPProgressView
