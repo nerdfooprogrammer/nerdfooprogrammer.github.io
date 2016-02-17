@@ -53,19 +53,31 @@
 
 
 
-<meta name="description" content="RunLoop是一个与线程相关的非常基础的功能，正如名字所说的那样它是一个事件处理循环，用于调度和和协调接收到的事件，RunLoop的目的就是让线程在有任务的时候busy，在没任务的时候sleep。RunLoop的管理不是全部自动的，你必需在适当的时机让你的线程启动RunLoop以及响应事件。Cocoa和Cocoa Foundation提供了RunLoop对象用来管理线程的RunLoop，你的应用">
+<meta name="description" content="Objective-C中的内存管理是采用引用计数实现的，所谓引用计数（ARC,Automatic Reference Counting）是指内存管理中对引用采取自动计数的技术，当需要强引用对象时对象计数＋1，不强引用时对象计数－1,当对象的引用数为0时即销毁。
+内存管理的思考方式Objective-C中内存管理遵循以下原则
+
+自己生成的对象，自己持有。
+非自己生成的对象，自己也能持有。
+不再需要自">
 <meta property="og:type" content="article">
-<meta property="og:title" content="初识RunLoop">
-<meta property="og:url" content="http://nerdfooprogrammer.github.io/2016/01/31/初识RunLoop/index.html">
+<meta property="og:title" content="温习iOS内存管理">
+<meta property="og:url" content="http://nerdfooprogrammer.github.io/2016/02/17/温习iOS内存管理/index.html">
 <meta property="og:site_name" content="NerdFooProgrammer's blog">
-<meta property="og:description" content="RunLoop是一个与线程相关的非常基础的功能，正如名字所说的那样它是一个事件处理循环，用于调度和和协调接收到的事件，RunLoop的目的就是让线程在有任务的时候busy，在没任务的时候sleep。RunLoop的管理不是全部自动的，你必需在适当的时机让你的线程启动RunLoop以及响应事件。Cocoa和Cocoa Foundation提供了RunLoop对象用来管理线程的RunLoop，你的应用">
-<meta property="og:image" content="http://7xqh3q.com1.z0.glb.clouddn.com/RunLoop%27s%20Structure.pngRunLoop%E2%80%98s%20Structure.png">
-<meta property="og:image" content="http://7xqh3q.com1.z0.glb.clouddn.com/RunLoop%27s%20ModeRunLoop%27s%20Mode.png">
-<meta property="og:image" content="http://7xqh3q.com1.z0.glb.clouddn.com/RunLoop%27s%20OrderRunLoop%27s%20Order.png">
-<meta property="og:updated_time" content="2016-01-31T16:50:32.000Z">
+<meta property="og:description" content="Objective-C中的内存管理是采用引用计数实现的，所谓引用计数（ARC,Automatic Reference Counting）是指内存管理中对引用采取自动计数的技术，当需要强引用对象时对象计数＋1，不强引用时对象计数－1,当对象的引用数为0时即销毁。
+内存管理的思考方式Objective-C中内存管理遵循以下原则
+
+自己生成的对象，自己持有。
+非自己生成的对象，自己也能持有。
+不再需要自">
+<meta property="og:updated_time" content="2016-02-17T14:40:33.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="初识RunLoop">
-<meta name="twitter:description" content="RunLoop是一个与线程相关的非常基础的功能，正如名字所说的那样它是一个事件处理循环，用于调度和和协调接收到的事件，RunLoop的目的就是让线程在有任务的时候busy，在没任务的时候sleep。RunLoop的管理不是全部自动的，你必需在适当的时机让你的线程启动RunLoop以及响应事件。Cocoa和Cocoa Foundation提供了RunLoop对象用来管理线程的RunLoop，你的应用">
+<meta name="twitter:title" content="温习iOS内存管理">
+<meta name="twitter:description" content="Objective-C中的内存管理是采用引用计数实现的，所谓引用计数（ARC,Automatic Reference Counting）是指内存管理中对引用采取自动计数的技术，当需要强引用对象时对象计数＋1，不强引用时对象计数－1,当对象的引用数为0时即销毁。
+内存管理的思考方式Objective-C中内存管理遵循以下原则
+
+自己生成的对象，自己持有。
+非自己生成的对象，自己也能持有。
+不再需要自">
 
 
 
@@ -77,7 +89,7 @@
   };
 </script>
 
-  <title> 初识RunLoop | NerdFooProgrammer's blog </title>
+  <title> 温习iOS内存管理 | NerdFooProgrammer's blog </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -207,7 +219,7 @@
             
             
               
-                初识RunLoop
+                温习iOS内存管理
               
             
           </h1>
@@ -216,8 +228,8 @@
         <div class="post-meta">
           <span class="post-time">
             发表于
-            <time itemprop="dateCreated" datetime="2016-01-31T19:22:49+08:00" content="2016-01-31">
-              2016-01-31
+            <time itemprop="dateCreated" datetime="2016-02-17T21:20:50+08:00" content="2016-02-17">
+              2016-02-17
             </time>
           </span>
 
@@ -227,8 +239,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/01/31/初识RunLoop/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/01/31/初识RunLoop/" itemprop="commentsCount"></span>
+                <a href="/2016/02/17/温习iOS内存管理/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/02/17/温习iOS内存管理/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -247,55 +259,92 @@
       
 
       
-        <span itemprop="articleBody"><p>RunLoop是一个与线程相关的非常基础的功能，正如名字所说的那样它是一个事件处理循环，用于调度和和协调接收到的事件，<strong>RunLoop的目的就是让线程在有任务的时候busy，在没任务的时候sleep。</strong><br>RunLoop的管理不是全部自动的，你必需在适当的时机让你的线程启动RunLoop以及响应事件。Cocoa和Cocoa Foundation提供了RunLoop对象用来管理线程的RunLoop，你的应用不必显示地创建RunLoop对象，每个线程包括主线程都有一个关联的RunLoop对象，只有副线程需要显示地运行RunLoop（主线程的创建运行都是app框架自动完成的）。下面主要从RunLoop的构成、创建、运行、模式、事件执行顺序、添加事件源、停止方面来讲解。<a id="more"></a></p>
-<h2 id="RunLoop_u89E3_u5256"><a href="#RunLoop_u89E3_u5256" class="headerlink" title="RunLoop解剖"></a>RunLoop解剖</h2><p>RunLoop正如它的名字一样是个循环，主要处理异步输入事件。你的代码中提供了while或者for循环来驱动RunLoop，其伪代码如下：</p>
-<pre><code>- (void)runLoop
-{
-    init();
-    do{
-        //接收输入事件
-        var message = getNextMessage();
-        //处理事件
-        HandeleMessage(message);
-    }while (condition);
-}
-</code></pre><p>RunLoop处理两类事件，一类为<strong>输入事件</strong>(异步投递，经常来自其他线程),输入事件主要包括端口（网口、蓝牙）、自定义、performSelector；另一类为<strong>定时器</strong>（同步投递，产生于内部时钟调度）。另外为了处理输入源，RunLoop也会在某些时刻发送一些通知，让观察者们进行一些额外的处理，RunLoop的整体结构如下图所示：</p>
-<p><img src="http://7xqh3q.com1.z0.glb.clouddn.com/RunLoop%27s%20Structure.pngRunLoop%E2%80%98s%20Structure.png" alt="RunLoop的结构和输入源"></p>
-<h2 id="RunLoop_u521B_u5EFA"><a href="#RunLoop_u521B_u5EFA" class="headerlink" title="RunLoop创建"></a>RunLoop创建</h2><p>Cocoa框架不能显示地创建RunLoop对象，只需掉用相关API获取即可，示例代码如下：</p>
-<pre><code>//获取当前线程的RunLoop（相当于创建RunLoop）
-[NSRunLoop currentRunLoop];
-//获取主线程的RunLoop
-[NSRunLoop mainRunLoop];
-</code></pre><h2 id="RunLoop_u8FD0_u884C"><a href="#RunLoop_u8FD0_u884C" class="headerlink" title="RunLoop运行"></a>RunLoop运行</h2><p>NSRunLoop类提供了3个API启动RunLoop，其本质都是调用<code>- (BOOL)runMode:(NSString *)mode beforeDate:(NSDate *)limitDate;</code>示例代码如下：</p>
-<pre><code>[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
-</code></pre><h2 id="RunLoop_u8FD0_u884C_u6A21_u5F0F"><a href="#RunLoop_u8FD0_u884C_u6A21_u5F0F" class="headerlink" title="RunLoop运行模式"></a>RunLoop运行模式</h2><p>RunLoop Mode是一个用来监听输入源和Time以及用于通知观察者的集合，每当你运行你的RunLoop时需要指定一个特定的Mode，一个RunLoop有多个Mode。只有在相关联的Mode下输入源和Timer才会被监听，一般事件都运行在<code>NSDefaultRunLoopMode</code>下,详细的模式及说明见下图所示：</p>
-<p><img src="http://7xqh3q.com1.z0.glb.clouddn.com/RunLoop%27s%20ModeRunLoop%27s%20Mode.png" alt="RunLoop Mode"></p>
-<p>这里需要注意的地方是：一般在主线程添加timer默认都运行在<code>NSDefaultRunLoopMode</code>下，而用户操作事件比如滑动ScrollView时RunLoop会优先运行在<code>NSEventTranckingRunLoopMode</code>下，就会导致Timer不运行。<strong>解决办法：把Timer添加到<code>NSRunLoopCommonModes</code>下</strong>。</p>
-<h2 id="RunLoop_u4E8B_u4EF6_u987A_u5E8F"><a href="#RunLoop_u4E8B_u4EF6_u987A_u5E8F" class="headerlink" title="RunLoop事件顺序"></a>RunLoop事件顺序</h2><p>每次运行RunLoop，RunLoop都会处理挂起事件和给相关的Observer产生通知，每一个步骤都是特定的，执行顺序如下图所示：</p>
-<p><img src="http://7xqh3q.com1.z0.glb.clouddn.com/RunLoop%27s%20OrderRunLoop%27s%20Order.png" alt="RunLoop执行顺序"></p>
-<h2 id="RunLoop_u6DFB_u52A0_u4E8B_u4EF6_u6E90"><a href="#RunLoop_u6DFB_u52A0_u4E8B_u4EF6_u6E90" class="headerlink" title="RunLoop添加事件源"></a>RunLoop添加事件源</h2><p>创建好RunLoop后，需要至少向RunLoop添加一个待监听的事件，否则RunLoop会直接退出。<code>AFNetworing</code>的RunLoop中就添加了无用的事件，主要目的就是不让RunLoop直接退出，具体代码如下：</p>
-<pre><code>+ (void)networkRequestThreadEntryPoint:(id)__unused object {
-    @autoreleasepool {
-        [[NSThread currentThread] setName:@&quot;AFNetworking&quot;];
-        NSRunLoop *runLoop = [NSRunLoop currentRunLoop];
-        //添加一个监听事件，防止RunLoop直接退出
-        [runLoop addPort:[NSMachPort port] forMode:NSDefaultRunLoopMode];
-        [runLoop run];
-    }
-}
-</code></pre><h2 id="RunLoop_u9000_u51FA"><a href="#RunLoop_u9000_u51FA" class="headerlink" title="RunLoop退出"></a>RunLoop退出</h2><p>RunLoop有2种方法退出，分别为：</p>
+        <span itemprop="articleBody"><p>Objective-C中的内存管理是采用引用计数实现的，所谓引用计数（ARC,Automatic Reference Counting）是指内存管理中对引用采取自动计数的技术，当需要强引用对象时对象计数＋1，不强引用时对象计数－1,当对象的引用数为0时即销毁。</p>
+<h3 id="u5185_u5B58_u7BA1_u7406_u7684_u601D_u8003_u65B9_u5F0F"><a href="#u5185_u5B58_u7BA1_u7406_u7684_u601D_u8003_u65B9_u5F0F" class="headerlink" title="内存管理的思考方式"></a>内存管理的思考方式</h3><p>Objective-C中内存管理遵循以下原则</p>
 <ul>
-<li>配置RunLoop的超时时间到，自动退出</li>
-<li>显示地退出RunLoop</li>
+<li>自己生成的对象，自己持有。</li>
+<li>非自己生成的对象，自己也能持有。</li>
+<li>不再需要自己持有的对象时释放。</li>
+<li>非自己持有的对象无法释放。<a id="more"></a>
+上面出现的“生成”、“持有”、“释放”再加上“废弃”这4个动作对应的Objective-C中方法如下表所示：</li>
 </ul>
-<p>如果你能管理RunLoop的话优先选用配置超时时间这种方法，因为这种方法可以让RunLoop正常地退出（在退出前可以给Observer发送相关通知），这两种方法的示例代码如下：</p>
-<pre><code>//超时退出RunLoop
-NSDate *timeoutDate = [NSDate dateWithTimeIntervalSinceNow:10];
-[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:timeoutDate];
-//显示地退出RunLoop
-CFRunLoopRef currentRunLoopRef = [[NSRunLoop currentRunLoop] getCFRunLoop];
-CFRunLoopStop(currentRunLoopRef);
-</code></pre><h2 id="u53C2_u8003_u6587_u732E"><a href="#u53C2_u8003_u6587_u732E" class="headerlink" title="参考文献"></a>参考文献</h2><p><a href="https://developer.apple.com/library/prerelease/ios/documentation/Cocoa/Conceptual/Multithreading/RunLoopManagement/RunLoopManagement.html#//apple_ref/doc/uid/10000057i-CH16-SW4" target="_blank" rel="external">Threading Programming Guide</a></p>
+<table>
+<thead>
+<tr>
+<th>对象操作</th>
+<th>Objective－C方法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>生成并持有对象</td>
+<td>alloc/new/copy/mutableCopy等方法</td>
+</tr>
+<tr>
+<td>持有对象</td>
+<td>retain方法</td>
+</tr>
+<tr>
+<td>释放对象</td>
+<td>release方法</td>
+</tr>
+<tr>
+<td>废弃对象</td>
+<td>dealloc方法</td>
+</tr>
+</tbody>
+</table>
+<h3 id="u6240_u6709_u6743_u4FEE_u9970_u7B26"><a href="#u6240_u6709_u6743_u4FEE_u9970_u7B26" class="headerlink" title="所有权修饰符"></a>所有权修饰符</h3><p>Objective-C中所有权修饰符一共有4种，分别为：</p>
+<ul>
+<li>__strong修饰符</li>
+<li>__weak修饰符</li>
+<li>__unsafe_unretained修饰符</li>
+<li>__autoreleasing修饰符</li>
+</ul>
+<h4 id="strong_u4FEE_u9970_u7B26"><a href="#strong_u4FEE_u9970_u7B26" class="headerlink" title="__strong修饰符"></a>__strong修饰符</h4><p>__strong修饰符是id类型和对象类型默认的所有权修饰符，表示<strong>持有对象</strong>。</p>
+<h4 id="weak_u4FEE_u9970_u7B26"><a href="#weak_u4FEE_u9970_u7B26" class="headerlink" title="__weak修饰符"></a>__weak修饰符</h4><p><strong>weak修饰符与</strong>strong修饰符相反，提供弱引用，<strong>不持有对象</strong>，当指向的对象废气时自动变成<code>nil</code>，正因如此它能完美解决<strong>循环引用</strong>问题。</p>
+<h4 id="unsafe_unretained_u4FEE_u9970_u7B26"><a href="#unsafe_unretained_u4FEE_u9970_u7B26" class="headerlink" title="__unsafe_unretained修饰符"></a>__unsafe_unretained修饰符</h4><p>__unsafe_unretained修饰符正如其名unsafe所示，是不安全的所有权修饰符，用它修饰的变量也不能持有对象，但是当所指向的对象废气时其值<strong>不会变成nil</strong>，这种情景下就会产生野指针，故而不安全。</p>
+<h4 id="autoreleasing_u4FEE_u9970_u7B26"><a href="#autoreleasing_u4FEE_u9970_u7B26" class="headerlink" title="__autoreleasing修饰符"></a>__autoreleasing修饰符</h4><p><strong>autoreleasing修饰符表示该对象已注册到autoreleasepool中，该修饰符一般用于id的对象或者对象的指针，在CocoaTouch框架中一般返回error值时通常会用(NSError* </strong>autoreleasing<em>)error方式，这里之所以选用__autoreleasing修饰符是为了符合<em>*内存管理思考方式</em></em>：</p>
+<blockquote>
+<p>作为alloc/new/copy/mutableCopy方法返回值取得的对象是自己生成并持有的，其它情况下便是取得非自己生成并持有的对象。因此，使用附有__autoreleasing修饰符的变量作为对象取得参数，与除alloc/new/copy/mutable/Copy外其他方法的返回值取得对象完全一样，都会注册到autoreleasepool，并取得非自己生成并持有的对象。</p>
+</blockquote>
+<h3 id="u5C5E_u6027_u4E0E_u6240_u6709_u6743_u4FEE_u9970_u7B26"><a href="#u5C5E_u6027_u4E0E_u6240_u6709_u6743_u4FEE_u9970_u7B26" class="headerlink" title="属性与所有权修饰符"></a>属性与所有权修饰符</h3><p>属性声明的属性与所有权修饰符的对应关系如下表所示：</p>
+<table>
+<thead>
+<tr>
+<th>属性声明的属性</th>
+<th>所有权修饰符</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>assign</td>
+<td>__unsafe_unretained修饰符</td>
+</tr>
+<tr>
+<td>copy</td>
+<td>__strong修饰符（但是赋值的是被复制的对象）</td>
+</tr>
+<tr>
+<td>retain</td>
+<td>__strong修饰符</td>
+</tr>
+<tr>
+<td>strong</td>
+<td>__strong修饰符</td>
+</tr>
+<tr>
+<td>unsafe_unretained</td>
+<td>__unsafe_unretained修饰符</td>
+</tr>
+<tr>
+<td>weak</td>
+<td>__weak修饰符</td>
+</tr>
+</tbody>
+</table>
+<p>以上各种属性赋值给指定的属性中就相当于赋值给附加各属性对应的所有权修饰符的变量中。只有copy属性不是简单的赋值，它赋值的是通过NSCopying接口的copyWithZone:方法复制赋值源所生成的对象。</p>
+<h3 id="u53C2_u8003_u5F15_u7528"><a href="#u53C2_u8003_u5F15_u7528" class="headerlink" title="参考引用"></a>参考引用</h3><p><a href="http://book.douban.com/subject/24720270/" target="_blank" rel="external">Objective-C高级编程</a></p>
 </span>
       
     </div>
@@ -307,17 +356,13 @@ CFRunLoopStop(currentRunLoopRef);
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/01/25/窥探NSOperation/" rel="next" title="窥探NSOperation">
-                <i class="fa fa-chevron-left"></i> 窥探NSOperation
+              <a href="/2016/02/16/估计是史上最简单的自定义进度条实现/" rel="next" title="估计是史上最简单的自定义进度条实现">
+                <i class="fa fa-chevron-left"></i> 估计是史上最简单的自定义进度条实现
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/02/16/估计是史上最简单的自定义进度条实现/" rel="prev" title="估计是史上最简单的自定义进度条实现">
-                估计是史上最简单的自定义进度条实现 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -344,8 +389,8 @@ CFRunLoopStop(currentRunLoopRef);
         
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2016/01/31/初识RunLoop/"
-           data-title="初识RunLoop" data-url="http://nerdfooprogrammer.github.io/2016/01/31/初识RunLoop/">
+      <div class="ds-thread" data-thread-key="2016/02/17/温习iOS内存管理/"
+           data-title="温习iOS内存管理" data-url="http://nerdfooprogrammer.github.io/2016/02/17/温习iOS内存管理/">
       </div>
     
   </div>
@@ -452,7 +497,7 @@ CFRunLoopStop(currentRunLoopRef);
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#RunLoop_u89E3_u5256"><span class="nav-number">1.</span> <span class="nav-text">RunLoop解剖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RunLoop_u521B_u5EFA"><span class="nav-number">2.</span> <span class="nav-text">RunLoop创建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RunLoop_u8FD0_u884C"><span class="nav-number">3.</span> <span class="nav-text">RunLoop运行</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RunLoop_u8FD0_u884C_u6A21_u5F0F"><span class="nav-number">4.</span> <span class="nav-text">RunLoop运行模式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RunLoop_u4E8B_u4EF6_u987A_u5E8F"><span class="nav-number">5.</span> <span class="nav-text">RunLoop事件顺序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RunLoop_u6DFB_u52A0_u4E8B_u4EF6_u6E90"><span class="nav-number">6.</span> <span class="nav-text">RunLoop添加事件源</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RunLoop_u9000_u51FA"><span class="nav-number">7.</span> <span class="nav-text">RunLoop退出</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#u53C2_u8003_u6587_u732E"><span class="nav-number">8.</span> <span class="nav-text">参考文献</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#u5185_u5B58_u7BA1_u7406_u7684_u601D_u8003_u65B9_u5F0F"><span class="nav-number">1.</span> <span class="nav-text">内存管理的思考方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u6240_u6709_u6743_u4FEE_u9970_u7B26"><span class="nav-number">2.</span> <span class="nav-text">所有权修饰符</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#strong_u4FEE_u9970_u7B26"><span class="nav-number">2.1.</span> <span class="nav-text">__strong修饰符</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#weak_u4FEE_u9970_u7B26"><span class="nav-number">2.2.</span> <span class="nav-text">__weak修饰符</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#unsafe_unretained_u4FEE_u9970_u7B26"><span class="nav-number">2.3.</span> <span class="nav-text">__unsafe_unretained修饰符</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#autoreleasing_u4FEE_u9970_u7B26"><span class="nav-number">2.4.</span> <span class="nav-text">__autoreleasing修饰符</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u5C5E_u6027_u4E0E_u6240_u6709_u6743_u4FEE_u9970_u7B26"><span class="nav-number">3.</span> <span class="nav-text">属性与所有权修饰符</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u53C2_u8003_u5F15_u7528"><span class="nav-number">4.</span> <span class="nav-text">参考引用</span></a></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator">
