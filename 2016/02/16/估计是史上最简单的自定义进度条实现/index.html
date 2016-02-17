@@ -70,7 +70,7 @@
 创建合适的CAAnimation;
 把">
 <meta property="og:image" content="http://7xqh3q.com1.z0.glb.clouddn.com/progress.gif">
-<meta property="og:updated_time" content="2016-02-17T14:45:17.000Z">
+<meta property="og:updated_time" content="2016-02-17T14:47:01.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="估计是史上最简单的自定义进度条实现">
 <meta name="twitter:description" content="进度条（ProgressBar）估计在每个App中都会使用到，再加上最近学习完了CoreAnimation框架，故而想自己实现一款进度条玩玩。
@@ -265,41 +265,44 @@
 <ol>
 <li>创建动画Path、CALayer；</li>
 <li>创建合适的CAAnimation;</li>
-<li><p>把CAAnimation添加到想要动画的CALayer上。</p>
-<a id="more"></a>
-<p>下面就依照这3个步骤逐步实现我们的进度条。</p>
-<h3 id="u521B_u5EFA_u52A8_u753BPath_u3001CALayer"><a href="#u521B_u5EFA_u52A8_u753BPath_u3001CALayer" class="headerlink" title="创建动画Path、CALayer"></a>创建动画Path、CALayer</h3><p>iOS中画路径最简单的就是用<code>UIBezierPath</code>实现(本文只需要画一条线)，因为要实现进度条所以layer最好选用<code>CAShapeLayer</code>(因为CAShapeLayer有个strokeStart和strokeEnd属性非常方便用作进度条动画)，再者进度条需要有前景色和背景色所以需要创建2个<code>CAShapeLayer</code>，相关伪代码如下：</p>
-<p> @implementation NFPProgressView<br> {</p>
-<pre><code>//Layer
-CAShapeLayer *progressLayer;
-//backgroundLayer
-CAShapeLayer *backgroundLayer;
-UIBezierPath *progressPath;
-</code></pre><p> }</p>
-<ul>
-<li>(instancetype)initWithFrame:(CGRect)frame<br>{<br>  self = [super initWithFrame:frame];<br>  if(self)<br>  {<pre><code>//Path
-progressPath = [UIBezierPath bezierPath];
-[progressPath moveToPoint:CGPointMake(PROGRESSHEIGHT/2,frame.size.height/2)];
-[progressPath addLineToPoint:CGPointMake(frame.size.width-PROGRESSHEIGHT/2,frame.size.height/2)];
-//Layer
-progressLayer = [CAShapeLayer layer];
-progressLayer.path = progressPath.CGPath;
-progressLayer.lineWidth = PROGRESSHEIGHT;
-progressLayer.lineCap = kCALineCapRound;
-progressLayer.strokeColor = [UIColor redColor].CGColor;
-backgroundLayer = [CAShapeLayer layer];
-backgroundLayer.path = progressPath.CGPath;
-backgroundLayer.strokeColor = [UIColor greenColor].CGColor;
-backgroundLayer.lineWidth = PROGRESSHEIGHT;
-backgroundLayer.lineCap = kCALineCapRound;
-[self.layer addSublayer:backgroundLayer];
-[self.layer addSublayer:progressLayer];
-self.progress = 0.0;
-</code></pre>  }<br>  return self;<br>}</li>
-</ul>
-</li>
+<li>把CAAnimation添加到想要动画的CALayer上。<a id="more"></a>
+下面就依照这3个步骤逐步实现我们的进度条。<h3 id="u521B_u5EFA_u52A8_u753BPath_u3001CALayer"><a href="#u521B_u5EFA_u52A8_u753BPath_u3001CALayer" class="headerlink" title="创建动画Path、CALayer"></a>创建动画Path、CALayer</h3>iOS中画路径最简单的就是用<code>UIBezierPath</code>实现(本文只需要画一条线)，因为要实现进度条所以layer最好选用<code>CAShapeLayer</code>(因为CAShapeLayer有个strokeStart和strokeEnd属性非常方便用作进度条动画)，再者进度条需要有前景色和背景色所以需要创建2个<code>CAShapeLayer</code>，相关伪代码如下：</li>
 </ol>
-<h3 id="u521B_u5EFA_u5408_u9002_u7684CAAnimation"><a href="#u521B_u5EFA_u5408_u9002_u7684CAAnimation" class="headerlink" title="创建合适的CAAnimation"></a>创建合适的CAAnimation</h3><p>因进度条动画只有2帧（start、end）所以选用<code>CABasicAnimation</code>,创建时KeyPath设置为“strokeEnd”，创建动画的<code>animationWithKeyPath:</code>方法其本质上是KVO，也就是它会监听KeyPath的变化。至于KeyPath可以设置为哪些属性，CALayer中那些描述为<strong>Animatable</strong>的属性均可以（当然我们还可以自定义，但需要实现一系列的方法，needsDisplayForKey：、display之类的），比如path、lineWidth。以下是创建CAAnimation的伪代码：</p>
+<pre><code>@implementation NFPProgressView
+{
+    //Layer
+    CAShapeLayer *progressLayer;
+    //backgroundLayer
+    CAShapeLayer *backgroundLayer;
+    UIBezierPath *progressPath;
+}
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if(self)
+    {
+        //Path
+        progressPath = [UIBezierPath bezierPath];
+        [progressPath moveToPoint:CGPointMake(PROGRESSHEIGHT/2,frame.size.height/2)];
+        [progressPath addLineToPoint:CGPointMake(frame.size.width-PROGRESSHEIGHT/2,frame.size.height/2)];
+        //Layer
+        progressLayer = [CAShapeLayer layer];
+        progressLayer.path = progressPath.CGPath;
+        progressLayer.lineWidth = PROGRESSHEIGHT;
+        progressLayer.lineCap = kCALineCapRound;
+        progressLayer.strokeColor = [UIColor redColor].CGColor;
+        backgroundLayer = [CAShapeLayer layer];
+        backgroundLayer.path = progressPath.CGPath;
+        backgroundLayer.strokeColor = [UIColor greenColor].CGColor;
+        backgroundLayer.lineWidth = PROGRESSHEIGHT;
+        backgroundLayer.lineCap = kCALineCapRound;
+        [self.layer addSublayer:backgroundLayer];
+        [self.layer addSublayer:progressLayer];
+        self.progress = 0.0;
+    }
+    return self;
+}
+</code></pre><h3 id="u521B_u5EFA_u5408_u9002_u7684CAAnimation"><a href="#u521B_u5EFA_u5408_u9002_u7684CAAnimation" class="headerlink" title="创建合适的CAAnimation"></a>创建合适的CAAnimation</h3><p>因进度条动画只有2帧（start、end）所以选用<code>CABasicAnimation</code>,创建时KeyPath设置为“strokeEnd”，创建动画的<code>animationWithKeyPath:</code>方法其本质上是KVO，也就是它会监听KeyPath的变化。至于KeyPath可以设置为哪些属性，CALayer中那些描述为<strong>Animatable</strong>的属性均可以（当然我们还可以自定义，但需要实现一系列的方法，needsDisplayForKey：、display之类的），比如path、lineWidth。以下是创建CAAnimation的伪代码：</p>
 <pre><code>CABasicAnimation *progressAnimation = [CABasicAnimation animationWithKeyPath:@&quot;strokeEnd&quot;];
 progressAnimation.duration = 0.5f;
 </code></pre><h3 id="u628ACAAnimation_u6DFB_u52A0_u5230_u60F3_u8981_u52A8_u753B_u7684CALayer_u4E0A"><a href="#u628ACAAnimation_u6DFB_u52A0_u5230_u60F3_u8981_u52A8_u753B_u7684CALayer_u4E0A" class="headerlink" title="把CAAnimation添加到想要动画的CALayer上"></a>把CAAnimation添加到想要动画的CALayer上</h3><p>这一步非常简单，只需把之前创建好的CAAnimation添加到之前创建好的CALayer上即可，伪代码如下：</p>
