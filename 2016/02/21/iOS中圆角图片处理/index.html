@@ -53,31 +53,28 @@
 
 
 
-<meta name="description" content="Objective-C中的内存管理是采用引用计数实现的，所谓引用计数（ARC,Automatic Reference Counting）是指内存管理中对引用采取自动计数的技术，当需要强引用对象时对象计数＋1，不强引用时对象计数－1,当对象的引用数为0时即销毁。
-内存管理的思考方式Objective-C中内存管理遵循以下原则
+<meta name="description" content="一款APP中对图片圆角的处理还是比较常见的，比如用户头像。iOS中处理图片圆角有3种方法，分别为：
 
-自己生成的对象，自己持有。
-非自己生成的对象，自己也能持有。
-不再需要自">
+CALayer的cornerRadius和masksToBounds的配合；
+CALayer的mask；
+利用CoreGraphics clip相应的圆角图像。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="温习iOS内存管理">
-<meta property="og:url" content="http://nerdfooprogrammer.github.io/2016/02/17/温习iOS内存管理/index.html">
+<meta property="og:title" content="iOS中圆角图片处理">
+<meta property="og:url" content="http://nerdfooprogrammer.github.io/2016/02/21/iOS中圆角图片处理/index.html">
 <meta property="og:site_name" content="NerdFooProgrammer's blog">
-<meta property="og:description" content="Objective-C中的内存管理是采用引用计数实现的，所谓引用计数（ARC,Automatic Reference Counting）是指内存管理中对引用采取自动计数的技术，当需要强引用对象时对象计数＋1，不强引用时对象计数－1,当对象的引用数为0时即销毁。
-内存管理的思考方式Objective-C中内存管理遵循以下原则
+<meta property="og:description" content="一款APP中对图片圆角的处理还是比较常见的，比如用户头像。iOS中处理图片圆角有3种方法，分别为：
 
-自己生成的对象，自己持有。
-非自己生成的对象，自己也能持有。
-不再需要自">
-<meta property="og:updated_time" content="2016-02-17T14:40:33.000Z">
+CALayer的cornerRadius和masksToBounds的配合；
+CALayer的mask；
+利用CoreGraphics clip相应的圆角图像。">
+<meta property="og:updated_time" content="2016-02-21T15:41:47.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="温习iOS内存管理">
-<meta name="twitter:description" content="Objective-C中的内存管理是采用引用计数实现的，所谓引用计数（ARC,Automatic Reference Counting）是指内存管理中对引用采取自动计数的技术，当需要强引用对象时对象计数＋1，不强引用时对象计数－1,当对象的引用数为0时即销毁。
-内存管理的思考方式Objective-C中内存管理遵循以下原则
+<meta name="twitter:title" content="iOS中圆角图片处理">
+<meta name="twitter:description" content="一款APP中对图片圆角的处理还是比较常见的，比如用户头像。iOS中处理图片圆角有3种方法，分别为：
 
-自己生成的对象，自己持有。
-非自己生成的对象，自己也能持有。
-不再需要自">
+CALayer的cornerRadius和masksToBounds的配合；
+CALayer的mask；
+利用CoreGraphics clip相应的圆角图像。">
 
 
 
@@ -89,7 +86,7 @@
   };
 </script>
 
-  <title> 温习iOS内存管理 | NerdFooProgrammer's blog </title>
+  <title> iOS中圆角图片处理 | NerdFooProgrammer's blog </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -219,7 +216,7 @@
             
             
               
-                温习iOS内存管理
+                iOS中圆角图片处理
               
             
           </h1>
@@ -228,8 +225,8 @@
         <div class="post-meta">
           <span class="post-time">
             发表于
-            <time itemprop="dateCreated" datetime="2016-02-17T21:20:50+08:00" content="2016-02-17">
-              2016-02-17
+            <time itemprop="dateCreated" datetime="2016-02-21T23:22:39+08:00" content="2016-02-21">
+              2016-02-21
             </time>
           </span>
 
@@ -239,8 +236,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/02/17/温习iOS内存管理/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/02/17/温习iOS内存管理/" itemprop="commentsCount"></span>
+                <a href="/2016/02/21/iOS中圆角图片处理/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/02/21/iOS中圆角图片处理/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -259,93 +256,32 @@
       
 
       
-        <span itemprop="articleBody"><p>Objective-C中的内存管理是采用引用计数实现的，所谓引用计数（ARC,Automatic Reference Counting）是指内存管理中对引用采取自动计数的技术，当需要强引用对象时对象计数＋1，不强引用时对象计数－1,当对象的引用数为0时即销毁。</p>
-<h3 id="u5185_u5B58_u7BA1_u7406_u7684_u601D_u8003_u65B9_u5F0F"><a href="#u5185_u5B58_u7BA1_u7406_u7684_u601D_u8003_u65B9_u5F0F" class="headerlink" title="内存管理的思考方式"></a>内存管理的思考方式</h3><p>Objective-C中内存管理遵循以下原则</p>
-<ul>
-<li>自己生成的对象，自己持有。</li>
-<li>非自己生成的对象，自己也能持有。</li>
-<li>不再需要自己持有的对象时释放。</li>
-<li>非自己持有的对象无法释放。<a id="more"></a>
-上面出现的“生成”、“持有”、“释放”再加上“废弃”这4个动作对应的Objective-C中方法如下表所示：</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th>对象操作</th>
-<th>Objective－C方法</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>生成并持有对象</td>
-<td>alloc/new/copy/mutableCopy等方法</td>
-</tr>
-<tr>
-<td>持有对象</td>
-<td>retain方法</td>
-</tr>
-<tr>
-<td>释放对象</td>
-<td>release方法</td>
-</tr>
-<tr>
-<td>废弃对象</td>
-<td>dealloc方法</td>
-</tr>
-</tbody>
-</table>
-<h3 id="u6240_u6709_u6743_u4FEE_u9970_u7B26"><a href="#u6240_u6709_u6743_u4FEE_u9970_u7B26" class="headerlink" title="所有权修饰符"></a>所有权修饰符</h3><p>Objective-C中所有权修饰符一共有4种，分别为：</p>
-<ul>
-<li>__strong修饰符</li>
-<li>__weak修饰符</li>
-<li>__unsafe_unretained修饰符</li>
-<li>__autoreleasing修饰符</li>
-</ul>
-<h4 id="strong_u4FEE_u9970_u7B26"><a href="#strong_u4FEE_u9970_u7B26" class="headerlink" title="__strong修饰符"></a>__strong修饰符</h4><p>__strong修饰符是id类型和对象类型默认的所有权修饰符，表示<strong>持有对象</strong>。</p>
-<h4 id="weak_u4FEE_u9970_u7B26"><a href="#weak_u4FEE_u9970_u7B26" class="headerlink" title="__weak修饰符"></a>__weak修饰符</h4><p><strong>weak修饰符与</strong>strong修饰符相反，提供弱引用，<strong>不持有对象</strong>，当指向的对象废气时自动变成<code>nil</code>，正因如此它能完美解决<strong>循环引用</strong>问题。</p>
-<h4 id="unsafe_unretained_u4FEE_u9970_u7B26"><a href="#unsafe_unretained_u4FEE_u9970_u7B26" class="headerlink" title="__unsafe_unretained修饰符"></a>__unsafe_unretained修饰符</h4><p>__unsafe_unretained修饰符正如其名unsafe所示，是不安全的所有权修饰符，用它修饰的变量也不能持有对象，但是当所指向的对象废气时其值<strong>不会变成nil</strong>，这种情景下就会产生野指针，故而不安全。</p>
-<h4 id="autoreleasing_u4FEE_u9970_u7B26"><a href="#autoreleasing_u4FEE_u9970_u7B26" class="headerlink" title="__autoreleasing修饰符"></a>__autoreleasing修饰符</h4><p><strong>autoreleasing修饰符表示该对象已注册到autoreleasepool中，该修饰符一般用于id的对象或者对象的指针，在CocoaTouch框架中一般返回error值时通常会用(NSError* </strong>autoreleasing<em>)error方式，这里之所以选用__autoreleasing修饰符是为了符合<em>*内存管理思考方式</em></em>：</p>
-<blockquote>
-<p>作为alloc/new/copy/mutableCopy方法返回值取得的对象是自己生成并持有的，其它情况下便是取得非自己生成并持有的对象。因此，使用附有__autoreleasing修饰符的变量作为对象取得参数，与除alloc/new/copy/mutable/Copy外其他方法的返回值取得对象完全一样，都会注册到autoreleasepool，并取得非自己生成并持有的对象。</p>
-</blockquote>
-<h3 id="u5C5E_u6027_u4E0E_u6240_u6709_u6743_u4FEE_u9970_u7B26"><a href="#u5C5E_u6027_u4E0E_u6240_u6709_u6743_u4FEE_u9970_u7B26" class="headerlink" title="属性与所有权修饰符"></a>属性与所有权修饰符</h3><p>属性声明的属性与所有权修饰符的对应关系如下表所示：</p>
-<table>
-<thead>
-<tr>
-<th>属性声明的属性</th>
-<th>所有权修饰符</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>assign</td>
-<td>__unsafe_unretained修饰符</td>
-</tr>
-<tr>
-<td>copy</td>
-<td>__strong修饰符（但是赋值的是被复制的对象）</td>
-</tr>
-<tr>
-<td>retain</td>
-<td>__strong修饰符</td>
-</tr>
-<tr>
-<td>strong</td>
-<td>__strong修饰符</td>
-</tr>
-<tr>
-<td>unsafe_unretained</td>
-<td>__unsafe_unretained修饰符</td>
-</tr>
-<tr>
-<td>weak</td>
-<td>__weak修饰符</td>
-</tr>
-</tbody>
-</table>
-<p>以上各种属性赋值给指定的属性中就相当于赋值给附加各属性对应的所有权修饰符的变量中。只有copy属性不是简单的赋值，它赋值的是通过NSCopying接口的copyWithZone:方法复制赋值源所生成的对象。</p>
-<h3 id="u53C2_u8003_u5F15_u7528"><a href="#u53C2_u8003_u5F15_u7528" class="headerlink" title="参考引用"></a>参考引用</h3><p><a href="http://book.douban.com/subject/24720270/" target="_blank" rel="external">Objective-C高级编程</a></p>
-</span>
+        <span itemprop="articleBody"><p>一款APP中对图片圆角的处理还是比较常见的，比如用户头像。iOS中处理图片圆角有3种方法，分别为：</p>
+<ol>
+<li>CALayer的cornerRadius和masksToBounds的配合；</li>
+<li>CALayer的mask；</li>
+<li>利用CoreGraphics clip相应的圆角图像。<a id="more"></a>
+方法1和方法2性能低下，具体解释参见：<br><a href="http://www.cocoachina.com/ios/20150803/12873.html" target="_blank" rel="external">小心别让圆角成了你列表的帧数杀手</a></li>
+</ol>
+<p>所以这个主要讲解下方法3的实现，考虑到圆角处理是UIImageView比较常见的处理，故而把圆角处理写在了分类中，以下是具体源码：</p>
+<pre><code>@implementation UIImageView (UIImageCorner)
+
+- (void)cornerRadius:(CGFloat)radius
+{
+    //创建一个图像上下文
+    UIGraphicsBeginImageContextWithOptions(self.bounds.size, NO, [UIScreen mainScreen].scale);
+    //创建一个内切圆路径
+    [[UIBezierPath bezierPathWithRoundedRect:CGRectMake(0, 0, self.bounds.size.width, self.bounds.size.height) cornerRadius:radius] addClip];
+    //在指定区域内绘制图像
+    [self.image drawInRect:self.bounds];
+    //从当前图像上下文中取出之前回执的图像
+    self.image = UIGraphicsGetImageFromCurrentImageContext();
+    //删除之前创建的图像上下文
+    UIGraphicsEndImageContext();
+}
+
+@end
+</code></pre></span>
       
     </div>
 
@@ -356,17 +292,13 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/02/16/估计是史上最简单的自定义进度条实现/" rel="next" title="估计是史上最简单的自定义进度条实现">
-                <i class="fa fa-chevron-left"></i> 估计是史上最简单的自定义进度条实现
+              <a href="/2016/02/17/温习iOS内存管理/" rel="next" title="温习iOS内存管理">
+                <i class="fa fa-chevron-left"></i> 温习iOS内存管理
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/02/21/iOS中圆角图片处理/" rel="prev" title="iOS中圆角图片处理">
-                iOS中圆角图片处理 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -393,8 +325,8 @@
         
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2016/02/17/温习iOS内存管理/"
-           data-title="温习iOS内存管理" data-url="http://nerdfooprogrammer.github.io/2016/02/17/温习iOS内存管理/">
+      <div class="ds-thread" data-thread-key="2016/02/21/iOS中圆角图片处理/"
+           data-title="iOS中圆角图片处理" data-url="http://nerdfooprogrammer.github.io/2016/02/21/iOS中圆角图片处理/">
       </div>
     
   </div>
@@ -501,7 +433,7 @@
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#u5185_u5B58_u7BA1_u7406_u7684_u601D_u8003_u65B9_u5F0F"><span class="nav-number">1.</span> <span class="nav-text">内存管理的思考方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u6240_u6709_u6743_u4FEE_u9970_u7B26"><span class="nav-number">2.</span> <span class="nav-text">所有权修饰符</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#strong_u4FEE_u9970_u7B26"><span class="nav-number">2.1.</span> <span class="nav-text">__strong修饰符</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#weak_u4FEE_u9970_u7B26"><span class="nav-number">2.2.</span> <span class="nav-text">__weak修饰符</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#unsafe_unretained_u4FEE_u9970_u7B26"><span class="nav-number">2.3.</span> <span class="nav-text">__unsafe_unretained修饰符</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#autoreleasing_u4FEE_u9970_u7B26"><span class="nav-number">2.4.</span> <span class="nav-text">__autoreleasing修饰符</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u5C5E_u6027_u4E0E_u6240_u6709_u6743_u4FEE_u9970_u7B26"><span class="nav-number">3.</span> <span class="nav-text">属性与所有权修饰符</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u53C2_u8003_u5F15_u7528"><span class="nav-number">4.</span> <span class="nav-text">参考引用</span></a></li></ol></div>
+              <p class="post-toc-empty">此文章未包含目录</p>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator">
