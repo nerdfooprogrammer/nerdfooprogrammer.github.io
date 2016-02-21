@@ -67,7 +67,7 @@ CALayer的mask；
 CALayer的cornerRadius和masksToBounds的配合；
 CALayer的mask；
 利用CoreGraphics clip相应的圆角图像。">
-<meta property="og:updated_time" content="2016-02-21T15:41:47.000Z">
+<meta property="og:updated_time" content="2016-02-21T15:43:38.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS中圆角图片处理">
 <meta name="twitter:description" content="一款APP中对图片圆角的处理还是比较常见的，比如用户头像。iOS中处理图片圆角有3种方法，分别为：
@@ -263,7 +263,7 @@ CALayer的mask；
 <li>利用CoreGraphics clip相应的圆角图像。<a id="more"></a>
 方法1和方法2性能低下，具体解释参见：<br><a href="http://www.cocoachina.com/ios/20150803/12873.html" target="_blank" rel="external">小心别让圆角成了你列表的帧数杀手</a></li>
 </ol>
-<p>所以这个主要讲解下方法3的实现，考虑到圆角处理是UIImageView比较常见的处理，故而把圆角处理写在了分类中，以下是具体源码：</p>
+<p>所以这儿主要讲解下方法3的实现，考虑到圆角处理是UIImageView比较常见的处理，故而把圆角处理写在了分类中，以下是具体源码：</p>
 <pre><code>@implementation UIImageView (UIImageCorner)
 
 - (void)cornerRadius:(CGFloat)radius
