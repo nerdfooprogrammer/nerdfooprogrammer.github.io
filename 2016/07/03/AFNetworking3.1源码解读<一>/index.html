@@ -64,7 +64,7 @@ AFNetworking3.1代码结构">
 <meta property="og:image" content="http://7xqh3q.com1.z0.glb.clouddn.com/AFNetworking%20Structure.png">
 <meta property="og:image" content="http://7xqh3q.com1.z0.glb.clouddn.com/AFNetworking%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6%E9%80%9A%E4%BF%A1.png">
 <meta property="og:image" content="http://7xqh3q.com1.z0.glb.clouddn.com/Request-%3EResponse1.png">
-<meta property="og:updated_time" content="2016-07-03T10:00:28.000Z">
+<meta property="og:updated_time" content="2016-07-03T10:07:45.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="AFNetworking3.1源码解读<一>">
 <meta name="twitter:description" content="现阶段几乎所有的App都有联网的需求，而AFNetworking则是一款优秀的HTTP网络通信库，Github上star数已过2W可以说是变成了iOS App标配三方库。AFNetworking3.0以前是基于NSURLConnetion，3.0以后才用Apple最新的网络库NSURLSession,本文仅用于记录学习AFNeworking3.1源码的心得。
@@ -251,9 +251,8 @@ AFNetworking3.1代码结构">
 
       
         <span itemprop="articleBody"><p>现阶段几乎所有的App都有联网的需求，而AFNetworking则是一款优秀的HTTP网络通信库，Github上star数已过2W可以说是变成了iOS App标配三方库。AFNetworking3.0以前是基于<code>NSURLConnetion</code>，3.0以后才用Apple最新的网络库<code>NSURLSession</code>,本文仅用于记录学习AFNeworking3.1源码的心得。</p>
-<p>AFNetworking3.1代码结构非常清晰，通过CocoaPods下载源码后可以看出主要由4部分组成：NSURLSession、Reachability、Security、Serialization。本篇先学习NSURLSession。</p>
+<p>AFNetworking3.1代码结构非常清晰，通过CocoaPods下载源码后可以看出主要由4部分组成：NSURLSession、Reachability、Security、Serialization。本篇先学习NSURLSession。<br><a id="more"></a></p>
 <p><img src="http://7xqh3q.com1.z0.glb.clouddn.com/AFNetworking%20Structure.png" alt=""></p>
-<a id="more"></a>
 <h2 id="Session"><a href="#Session" class="headerlink" title="Session"></a>Session</h2><p>AFNetworking中与Session相关的有2个类，分别为AFHTTPSessionManager和AFURLSessionManger。其中AFHTTPSessionManager是AFURLSessionManager的子类，主要提供了一些方便生成HTTP请求的接口;AFURLSessionManager则用于创建和管理NSURLSession对象。如果项目中与WebService交互的特别频繁，那么建议子类化AFHTTPSessionManager然后提供一个类方法来返回一个单例对象，该单例对象配置了项目中通用的鉴权、缓存之类的配置，此方法还可以统一处理异常行为。</p>
 <h2 id="u521D_u59CB_u5316"><a href="#u521D_u59CB_u5316" class="headerlink" title="初始化"></a>初始化</h2><ol>
 <li>NSURLSession配置：NSURLSession默认配置为<code>defaultSessionConfiguration</code>，该配置可以共享全局认证、缓存、Cookie存储策略。</li>
