@@ -61,10 +61,10 @@ AFNetworking3.1代码结构">
 <meta property="og:site_name" content="NerdFooProgrammer's blog">
 <meta property="og:description" content="现阶段几乎所有的App都有联网的需求，而AFNetworking则是一款优秀的HTTP网络通信库，Github上star数已过2W可以说是变成了iOS App标配三方库。AFNetworking3.0以前是基于NSURLConnetion，3.0以后才用Apple最新的网络库NSURLSession,本文仅用于记录学习AFNeworking3.1源码的心得。
 AFNetworking3.1代码结构">
-<meta property="og:image" content="http://7xqh3q.com1.z0.glb.clouddn.com/AFNetworking%20Structure.png =257x362">
-<meta property="og:image" content="http://7xqh3q.com1.z0.glb.clouddn.com/AFNetworking%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6%E9%80%9A%E4%BF%A1.png =514x330">
-<meta property="og:image" content="http://7xqh3q.com1.z0.glb.clouddn.com/Request-%3EResponse1.png =378x345">
-<meta property="og:updated_time" content="2016-07-03T09:50:20.000Z">
+<meta property="og:image" content="http://7xqh3q.com1.z0.glb.clouddn.com/AFNetworking%20Structure.png">
+<meta property="og:image" content="http://7xqh3q.com1.z0.glb.clouddn.com/AFNetworking%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6%E9%80%9A%E4%BF%A1.png">
+<meta property="og:image" content="http://7xqh3q.com1.z0.glb.clouddn.com/Request-%3EResponse1.png">
+<meta property="og:updated_time" content="2016-07-03T09:58:32.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="AFNetworking3.1源码解读<一>">
 <meta name="twitter:description" content="现阶段几乎所有的App都有联网的需求，而AFNetworking则是一款优秀的HTTP网络通信库，Github上star数已过2W可以说是变成了iOS App标配三方库。AFNetworking3.0以前是基于NSURLConnetion，3.0以后才用Apple最新的网络库NSURLSession,本文仅用于记录学习AFNeworking3.1源码的心得。
@@ -252,7 +252,7 @@ AFNetworking3.1代码结构">
       
         <span itemprop="articleBody"><p>现阶段几乎所有的App都有联网的需求，而AFNetworking则是一款优秀的HTTP网络通信库，Github上star数已过2W可以说是变成了iOS App标配三方库。AFNetworking3.0以前是基于<code>NSURLConnetion</code>，3.0以后才用Apple最新的网络库<code>NSURLSession</code>,本文仅用于记录学习AFNeworking3.1源码的心得。</p>
 <p>AFNetworking3.1代码结构非常清晰，通过CocoaPods下载源码后可以看出主要由4部分组成：NSURLSession、Reachability、Security、Serialization。本篇先学习NSURLSession。</p>
-<p><img src="http://7xqh3q.com1.z0.glb.clouddn.com/AFNetworking%20Structure.png =257x362" alt=""></p>
+<p><img src="http://7xqh3q.com1.z0.glb.clouddn.com/AFNetworking%20Structure.png" alt=""></p>
 <a id="more"></a>
 <h2 id="Session"><a href="#Session" class="headerlink" title="Session"></a>Session</h2><p>AFNetworking中与Session相关的有2个类，分别为AFHTTPSessionManager和AFURLSessionManger。其中AFHTTPSessionManager是AFURLSessionManager的子类，主要提供了一些方便生成HTTP请求的接口;AFURLSessionManager则用于创建和管理NSURLSession对象。如果项目中与WebService交互的特别频繁，那么建议子类化AFHTTPSessionManager然后提供一个类方法来返回一个单例对象，该单例对象配置了项目中通用的鉴权、缓存之类的配置，此方法还可以统一处理异常行为。</p>
 <h2 id="u521D_u59CB_u5316"><a href="#u521D_u59CB_u5316" class="headerlink" title="初始化"></a>初始化</h2><ol>
@@ -262,7 +262,7 @@ AFNetworking3.1代码结构">
 <li>响应格式：默认是<code>JSON</code>格式。</li>
 <li>安全策略：默认是<code>AFSSLPinningModeNone</code>。</li>
 </ol>
-<h2 id="u6838_u5FC3_u7EC4_u4EF6_u901A_u4FE1"><a href="#u6838_u5FC3_u7EC4_u4EF6_u901A_u4FE1" class="headerlink" title="核心组件通信"></a>核心组件通信</h2><p>一条HTTP请求创建、发送、响应接收需用到NSURLSession和Serialization这2个核心组件，整个通信过程如下图所示。<br><img src="http://7xqh3q.com1.z0.glb.clouddn.com/AFNetworking%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6%E9%80%9A%E4%BF%A1.png =514x330" alt="AFNetworking核心组件通信"></p>
+<h2 id="u6838_u5FC3_u7EC4_u4EF6_u901A_u4FE1"><a href="#u6838_u5FC3_u7EC4_u4EF6_u901A_u4FE1" class="headerlink" title="核心组件通信"></a>核心组件通信</h2><p>一条HTTP请求创建、发送、响应接收需用到NSURLSession和Serialization这2个核心组件，整个通信过程如下图所示。<br><img src="http://7xqh3q.com1.z0.glb.clouddn.com/AFNetworking%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6%E9%80%9A%E4%BF%A1.png" alt="AFNetworking核心组件通信"></p>
 <p>AFURLSessionManagerTaskDelegate是AFURLSessionManager的委托，处理实现请求进度、响应回调等与业务层直接交互的接口。AFURLSessionManager直接实现NSURLSessionDelegate系列回调接口，在实现</p>
 <p><code>- (void)URLSession:(__unused NSURLSession *)session
               task:(NSURLSessionTask *)task
@@ -275,7 +275,7 @@ didCompleteWithError:(NSError *)error</code></p>
 didFinishDownloadingToURL:(NSURL *)location</code></p>
 <p>这几个接口时委托给AFURLSessionManagerTaskDelegate处理。</p>
 <h2 id="u5173_u952E_u6280_u672F"><a href="#u5173_u952E_u6280_u672F" class="headerlink" title="关键技术"></a>关键技术</h2><h3 id="u54CD_u5E94-_26gt_3B_u8BF7_u6C42_u6620_u5C04"><a href="#u54CD_u5E94-_26gt_3B_u8BF7_u6C42_u6620_u5C04" class="headerlink" title="响应-&gt;请求映射"></a>响应-&gt;请求映射</h3><p>一般编写的网络请求都是异步的，当发送了多条网络请求后，如何识别出接收到的响应是哪个请求的结果呢？AFNetworking的做法是在内部维护一个NSMutableDictionary，key是NSURLSessionTask的taskIdentifier(由NSURLSession框架维护，确保唯一)，value是AFURLSessionManagerTaskDelegate(该委托持有请求的completionHandler、progress等)，在发送请求时添加taskIdentifier和相应的AFURLSessionManagerTaskDelegate，所以当AFNetworking接收到NSURLSession的finish回调时通过taskIdentifier查找到相应的AFURLSessionManagerTaskDelegate，然后AFURLSessionManagerTaskDelegate根据responseSerialization解析出响应数据返回给回调者。</p>
-<p>说到这儿你可能会疑惑taskIdentifier是如何确定的，更底层的实现是如何的呢？想要弄明白这些事情我们先补充点TCP相关的知识（HTTP是建立在TCP传输层之上的），一条TCP连接需要由6个元素确定：源mac地址、源ip地址、源端口号、目标mac地址、目标ip地址、目标端口号。当我们在一个App中向同一个Web服务器发送多条请求（即便是同一个Request发送了多次）时，就会创建多条TCP连接，这些连接的区别只在于源端口号不同，而源端口号默认是内核分配的，内核是知道哪个App（precess）申请了创建了哪些TCP连接的，所以当创建一个NSURLSessionTask时内核会先创建一条tcp连接，然后根据相关策略生成一个类端口号的标示返回赋值给taskIdentifier。大体意思如下图所示。<br><img src="http://7xqh3q.com1.z0.glb.clouddn.com/Request-%3EResponse1.png =378x345" alt="Request-&gt;Response"></p>
+<p>说到这儿你可能会疑惑taskIdentifier是如何确定的，更底层的实现是如何的呢？想要弄明白这些事情我们先补充点TCP相关的知识（HTTP是建立在TCP传输层之上的），一条TCP连接需要由6个元素确定：源mac地址、源ip地址、源端口号、目标mac地址、目标ip地址、目标端口号。当我们在一个App中向同一个Web服务器发送多条请求（即便是同一个Request发送了多次）时，就会创建多条TCP连接，这些连接的区别只在于源端口号不同，而源端口号默认是内核分配的，内核是知道哪个App（precess）申请了创建了哪些TCP连接的，所以当创建一个NSURLSessionTask时内核会先创建一条tcp连接，然后根据相关策略生成一个类端口号的标示返回赋值给taskIdentifier。大体意思如下图所示。<br><img src="http://7xqh3q.com1.z0.glb.clouddn.com/Request-%3EResponse1.png" alt="Request-&gt;Response"></p>
 <p>因为可以确定发送请求时的tcp端口号，所以响应到来时根据tcp端口号就可以确定是哪个请求的响应了。可以看出图中的ResponseA是Request2的响应，ResponseB是Request1的响应。</p>
 <p>总而言之就是每条Http请求都有自己的tcp连接，相当于有独立的传输通道，所以就可以根据响应的通道标示来找出是哪个请求的响应。</p>
 <h3 id="u8BF7_u6C42_u8FDB_u5EA6progress_u5B9E_u73B0"><a href="#u8BF7_u6C42_u8FDB_u5EA6progress_u5B9E_u73B0" class="headerlink" title="请求进度progress实现"></a>请求进度progress实现</h3><p>请求progress主要由AFURLSessionManagerTaskDelegate类实现，该类有两个NSProgress属性，分别为uploadProgress和downloadProgress，在创建请求时AFURLSessionManagerTaskDelegate让uploadProgress和downloadProgress使用KVO监听了NSURLSessionTask的属性(countOfBytesReceived、countOfBytesExpectedToReceive、countOfBytesSent、countOfBytesExpectedToSend)，所以在接收到请求数据后progress能实时响应。</p>
