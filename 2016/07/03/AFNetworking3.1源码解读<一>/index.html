@@ -53,19 +53,22 @@
 
 
 
-<meta name="description" content="RunLoop是一个与线程相关的非常基础的功能，正如名字所说的那样它是一个事件处理循环，用于调度和和协调接收到的事件，RunLoop的目的就是让线程在有任务的时候busy，在没任务的时候sleep。RunLoop的管理不是全部自动的，你必需在适当的时机让你的线程启动RunLoop以及响应事件。Cocoa和Cocoa Foundation提供了RunLoop对象用来管理线程的RunLoop，你的应用">
+<meta name="description" content="现阶段几乎所有的App都有联网的需求，而AFNetworking则是一款优秀的HTTP网络通信库，Github上star数已过2W可以说是变成了iOS App标配三方库。AFNetworking3.0以前是基于NSURLConnetion，3.0以后才用Apple最新的网络库NSURLSession,本文仅用于记录学习AFNeworking3.1源码的心得。
+AFNetworking3.1代码结构">
 <meta property="og:type" content="article">
-<meta property="og:title" content="初识RunLoop">
-<meta property="og:url" content="http://nerdfooprogrammer.github.io/2016/01/31/初识RunLoop/index.html">
+<meta property="og:title" content="AFNetworking3.1源码解读<一>">
+<meta property="og:url" content="http://nerdfooprogrammer.github.io/2016/07/03/AFNetworking3.1源码解读<一>/index.html">
 <meta property="og:site_name" content="NerdFooProgrammer's blog">
-<meta property="og:description" content="RunLoop是一个与线程相关的非常基础的功能，正如名字所说的那样它是一个事件处理循环，用于调度和和协调接收到的事件，RunLoop的目的就是让线程在有任务的时候busy，在没任务的时候sleep。RunLoop的管理不是全部自动的，你必需在适当的时机让你的线程启动RunLoop以及响应事件。Cocoa和Cocoa Foundation提供了RunLoop对象用来管理线程的RunLoop，你的应用">
-<meta property="og:image" content="http://7xqh3q.com1.z0.glb.clouddn.com/RunLoop%27s%20Structure.pngRunLoop%E2%80%98s%20Structure.png">
-<meta property="og:image" content="http://7xqh3q.com1.z0.glb.clouddn.com/RunLoop%27s%20ModeRunLoop%27s%20Mode.png">
-<meta property="og:image" content="http://7xqh3q.com1.z0.glb.clouddn.com/RunLoop%27s%20OrderRunLoop%27s%20Order.png">
-<meta property="og:updated_time" content="2016-01-31T16:50:32.000Z">
+<meta property="og:description" content="现阶段几乎所有的App都有联网的需求，而AFNetworking则是一款优秀的HTTP网络通信库，Github上star数已过2W可以说是变成了iOS App标配三方库。AFNetworking3.0以前是基于NSURLConnetion，3.0以后才用Apple最新的网络库NSURLSession,本文仅用于记录学习AFNeworking3.1源码的心得。
+AFNetworking3.1代码结构">
+<meta property="og:image" content="http://7xqh3q.com1.z0.glb.clouddn.com/AFNetworking%20Structure.png =257x362">
+<meta property="og:image" content="http://7xqh3q.com1.z0.glb.clouddn.com/AFNetworking%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6%E9%80%9A%E4%BF%A1.png =514x330">
+<meta property="og:image" content="http://7xqh3q.com1.z0.glb.clouddn.com/Request-%3EResponse1.png =378x345">
+<meta property="og:updated_time" content="2016-07-03T09:50:20.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="初识RunLoop">
-<meta name="twitter:description" content="RunLoop是一个与线程相关的非常基础的功能，正如名字所说的那样它是一个事件处理循环，用于调度和和协调接收到的事件，RunLoop的目的就是让线程在有任务的时候busy，在没任务的时候sleep。RunLoop的管理不是全部自动的，你必需在适当的时机让你的线程启动RunLoop以及响应事件。Cocoa和Cocoa Foundation提供了RunLoop对象用来管理线程的RunLoop，你的应用">
+<meta name="twitter:title" content="AFNetworking3.1源码解读<一>">
+<meta name="twitter:description" content="现阶段几乎所有的App都有联网的需求，而AFNetworking则是一款优秀的HTTP网络通信库，Github上star数已过2W可以说是变成了iOS App标配三方库。AFNetworking3.0以前是基于NSURLConnetion，3.0以后才用Apple最新的网络库NSURLSession,本文仅用于记录学习AFNeworking3.1源码的心得。
+AFNetworking3.1代码结构">
 
 
 
@@ -77,7 +80,7 @@
   };
 </script>
 
-  <title> 初识RunLoop | NerdFooProgrammer's blog </title>
+  <title> AFNetworking3.1源码解读<一> | NerdFooProgrammer's blog </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -207,7 +210,7 @@
             
             
               
-                初识RunLoop
+                AFNetworking3.1源码解读<一>
               
             
           </h1>
@@ -216,8 +219,8 @@
         <div class="post-meta">
           <span class="post-time">
             发表于
-            <time itemprop="dateCreated" datetime="2016-01-31T19:22:49+08:00" content="2016-01-31">
-              2016-01-31
+            <time itemprop="dateCreated" datetime="2016-07-03T17:44:09+08:00" content="2016-07-03">
+              2016-07-03
             </time>
           </span>
 
@@ -227,8 +230,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/01/31/初识RunLoop/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/01/31/初识RunLoop/" itemprop="commentsCount"></span>
+                <a href="/2016/07/03/AFNetworking3.1源码解读<一>/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/07/03/AFNetworking3.1源码解读<一>/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -247,55 +250,60 @@
       
 
       
-        <span itemprop="articleBody"><p>RunLoop是一个与线程相关的非常基础的功能，正如名字所说的那样它是一个事件处理循环，用于调度和和协调接收到的事件，<strong>RunLoop的目的就是让线程在有任务的时候busy，在没任务的时候sleep。</strong><br>RunLoop的管理不是全部自动的，你必需在适当的时机让你的线程启动RunLoop以及响应事件。Cocoa和Cocoa Foundation提供了RunLoop对象用来管理线程的RunLoop，你的应用不必显示地创建RunLoop对象，每个线程包括主线程都有一个关联的RunLoop对象，只有副线程需要显示地运行RunLoop（主线程的创建运行都是app框架自动完成的）。下面主要从RunLoop的构成、创建、运行、模式、事件执行顺序、添加事件源、停止方面来讲解。<a id="more"></a></p>
-<h2 id="RunLoop_u89E3_u5256"><a href="#RunLoop_u89E3_u5256" class="headerlink" title="RunLoop解剖"></a>RunLoop解剖</h2><p>RunLoop正如它的名字一样是个循环，主要处理异步输入事件。你的代码中提供了while或者for循环来驱动RunLoop，其伪代码如下：</p>
-<pre><code>- (void)runLoop
-{
-    init();
-    do{
-        //接收输入事件
-        var message = getNextMessage();
-        //处理事件
-        HandeleMessage(message);
-    }while (condition);
-}
-</code></pre><p>RunLoop处理两类事件，一类为<strong>输入事件</strong>(异步投递，经常来自其他线程),输入事件主要包括端口（网口、蓝牙）、自定义、performSelector；另一类为<strong>定时器</strong>（同步投递，产生于内部时钟调度）。另外为了处理输入源，RunLoop也会在某些时刻发送一些通知，让观察者们进行一些额外的处理，RunLoop的整体结构如下图所示：</p>
-<p><img src="http://7xqh3q.com1.z0.glb.clouddn.com/RunLoop%27s%20Structure.pngRunLoop%E2%80%98s%20Structure.png" alt="RunLoop的结构和输入源"></p>
-<h2 id="RunLoop_u521B_u5EFA"><a href="#RunLoop_u521B_u5EFA" class="headerlink" title="RunLoop创建"></a>RunLoop创建</h2><p>Cocoa框架不能显示地创建RunLoop对象，只需掉用相关API获取即可，示例代码如下：</p>
-<pre><code>//获取当前线程的RunLoop（相当于创建RunLoop）
-[NSRunLoop currentRunLoop];
-//获取主线程的RunLoop
-[NSRunLoop mainRunLoop];
-</code></pre><h2 id="RunLoop_u8FD0_u884C"><a href="#RunLoop_u8FD0_u884C" class="headerlink" title="RunLoop运行"></a>RunLoop运行</h2><p>NSRunLoop类提供了3个API启动RunLoop，其本质都是调用<code>- (BOOL)runMode:(NSString *)mode beforeDate:(NSDate *)limitDate;</code>示例代码如下：</p>
-<pre><code>[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
-</code></pre><h2 id="RunLoop_u8FD0_u884C_u6A21_u5F0F"><a href="#RunLoop_u8FD0_u884C_u6A21_u5F0F" class="headerlink" title="RunLoop运行模式"></a>RunLoop运行模式</h2><p>RunLoop Mode是一个用来监听输入源和Time以及用于通知观察者的集合，每当你运行你的RunLoop时需要指定一个特定的Mode，一个RunLoop有多个Mode。只有在相关联的Mode下输入源和Timer才会被监听，一般事件都运行在<code>NSDefaultRunLoopMode</code>下,详细的模式及说明见下图所示：</p>
-<p><img src="http://7xqh3q.com1.z0.glb.clouddn.com/RunLoop%27s%20ModeRunLoop%27s%20Mode.png" alt="RunLoop Mode"></p>
-<p>这里需要注意的地方是：一般在主线程添加timer默认都运行在<code>NSDefaultRunLoopMode</code>下，而用户操作事件比如滑动ScrollView时RunLoop会优先运行在<code>NSEventTranckingRunLoopMode</code>下，就会导致Timer不运行。<strong>解决办法：把Timer添加到<code>NSRunLoopCommonModes</code>下</strong>。</p>
-<h2 id="RunLoop_u4E8B_u4EF6_u987A_u5E8F"><a href="#RunLoop_u4E8B_u4EF6_u987A_u5E8F" class="headerlink" title="RunLoop事件顺序"></a>RunLoop事件顺序</h2><p>每次运行RunLoop，RunLoop都会处理挂起事件和给相关的Observer产生通知，每一个步骤都是特定的，执行顺序如下图所示：</p>
-<p><img src="http://7xqh3q.com1.z0.glb.clouddn.com/RunLoop%27s%20OrderRunLoop%27s%20Order.png" alt="RunLoop执行顺序"></p>
-<h2 id="RunLoop_u6DFB_u52A0_u4E8B_u4EF6_u6E90"><a href="#RunLoop_u6DFB_u52A0_u4E8B_u4EF6_u6E90" class="headerlink" title="RunLoop添加事件源"></a>RunLoop添加事件源</h2><p>创建好RunLoop后，需要至少向RunLoop添加一个待监听的事件，否则RunLoop会直接退出。<code>AFNetworing</code>的RunLoop中就添加了无用的事件，主要目的就是不让RunLoop直接退出，具体代码如下：</p>
-<pre><code>+ (void)networkRequestThreadEntryPoint:(id)__unused object {
-    @autoreleasepool {
-        [[NSThread currentThread] setName:@&quot;AFNetworking&quot;];
-        NSRunLoop *runLoop = [NSRunLoop currentRunLoop];
-        //添加一个监听事件，防止RunLoop直接退出
-        [runLoop addPort:[NSMachPort port] forMode:NSDefaultRunLoopMode];
-        [runLoop run];
-    }
-}
-</code></pre><h2 id="RunLoop_u9000_u51FA"><a href="#RunLoop_u9000_u51FA" class="headerlink" title="RunLoop退出"></a>RunLoop退出</h2><p>RunLoop有2种方法退出，分别为：</p>
-<ul>
-<li>配置RunLoop的超时时间到，自动退出</li>
-<li>显示地退出RunLoop</li>
+        <span itemprop="articleBody"><p>现阶段几乎所有的App都有联网的需求，而AFNetworking则是一款优秀的HTTP网络通信库，Github上star数已过2W可以说是变成了iOS App标配三方库。AFNetworking3.0以前是基于<code>NSURLConnetion</code>，3.0以后才用Apple最新的网络库<code>NSURLSession</code>,本文仅用于记录学习AFNeworking3.1源码的心得。</p>
+<p>AFNetworking3.1代码结构非常清晰，通过CocoaPods下载源码后可以看出主要由4部分组成：NSURLSession、Reachability、Security、Serialization。本篇先学习NSURLSession。</p>
+<p><img src="http://7xqh3q.com1.z0.glb.clouddn.com/AFNetworking%20Structure.png =257x362" alt=""></p>
+<a id="more"></a>
+<h2 id="Session"><a href="#Session" class="headerlink" title="Session"></a>Session</h2><p>AFNetworking中与Session相关的有2个类，分别为AFHTTPSessionManager和AFURLSessionManger。其中AFHTTPSessionManager是AFURLSessionManager的子类，主要提供了一些方便生成HTTP请求的接口;AFURLSessionManager则用于创建和管理NSURLSession对象。如果项目中与WebService交互的特别频繁，那么建议子类化AFHTTPSessionManager然后提供一个类方法来返回一个单例对象，该单例对象配置了项目中通用的鉴权、缓存之类的配置，此方法还可以统一处理异常行为。</p>
+<h2 id="u521D_u59CB_u5316"><a href="#u521D_u59CB_u5316" class="headerlink" title="初始化"></a>初始化</h2><ol>
+<li>NSURLSession配置：NSURLSession默认配置为<code>defaultSessionConfiguration</code>，该配置可以共享全局认证、缓存、Cookie存储策略。</li>
+<li>解析线程:创建了一个串行的<code>NSOperationQueue</code>用于处理Session的回调。</li>
+<li>多线程安全：为了使Add Request和Remove Request线程安全，创建了一个互斥锁<code>NSLock *lock</code>。</li>
+<li>响应格式：默认是<code>JSON</code>格式。</li>
+<li>安全策略：默认是<code>AFSSLPinningModeNone</code>。</li>
+</ol>
+<h2 id="u6838_u5FC3_u7EC4_u4EF6_u901A_u4FE1"><a href="#u6838_u5FC3_u7EC4_u4EF6_u901A_u4FE1" class="headerlink" title="核心组件通信"></a>核心组件通信</h2><p>一条HTTP请求创建、发送、响应接收需用到NSURLSession和Serialization这2个核心组件，整个通信过程如下图所示。<br><img src="http://7xqh3q.com1.z0.glb.clouddn.com/AFNetworking%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6%E9%80%9A%E4%BF%A1.png =514x330" alt="AFNetworking核心组件通信"></p>
+<p>AFURLSessionManagerTaskDelegate是AFURLSessionManager的委托，处理实现请求进度、响应回调等与业务层直接交互的接口。AFURLSessionManager直接实现NSURLSessionDelegate系列回调接口，在实现</p>
+<p><code>- (void)URLSession:(__unused NSURLSession *)session
+              task:(NSURLSessionTask *)task
+didCompleteWithError:(NSError *)error</code></p>
+<p><code>- (void)URLSession:(__unused NSURLSession *)session
+          dataTask:(__unused NSURLSessionDataTask *)dataTask
+    didReceiveData:(NSData *)data</code></p>
+<p><code>- (void)URLSession:(NSURLSession *)session
+      downloadTask:(NSURLSessionDownloadTask *)downloadTask
+didFinishDownloadingToURL:(NSURL *)location</code></p>
+<p>这几个接口时委托给AFURLSessionManagerTaskDelegate处理。</p>
+<h2 id="u5173_u952E_u6280_u672F"><a href="#u5173_u952E_u6280_u672F" class="headerlink" title="关键技术"></a>关键技术</h2><h3 id="u54CD_u5E94-_26gt_3B_u8BF7_u6C42_u6620_u5C04"><a href="#u54CD_u5E94-_26gt_3B_u8BF7_u6C42_u6620_u5C04" class="headerlink" title="响应-&gt;请求映射"></a>响应-&gt;请求映射</h3><p>一般编写的网络请求都是异步的，当发送了多条网络请求后，如何识别出接收到的响应是哪个请求的结果呢？AFNetworking的做法是在内部维护一个NSMutableDictionary，key是NSURLSessionTask的taskIdentifier(由NSURLSession框架维护，确保唯一)，value是AFURLSessionManagerTaskDelegate(该委托持有请求的completionHandler、progress等)，在发送请求时添加taskIdentifier和相应的AFURLSessionManagerTaskDelegate，所以当AFNetworking接收到NSURLSession的finish回调时通过taskIdentifier查找到相应的AFURLSessionManagerTaskDelegate，然后AFURLSessionManagerTaskDelegate根据responseSerialization解析出响应数据返回给回调者。</p>
+<p>说到这儿你可能会疑惑taskIdentifier是如何确定的，更底层的实现是如何的呢？想要弄明白这些事情我们先补充点TCP相关的知识（HTTP是建立在TCP传输层之上的），一条TCP连接需要由6个元素确定：源mac地址、源ip地址、源端口号、目标mac地址、目标ip地址、目标端口号。当我们在一个App中向同一个Web服务器发送多条请求（即便是同一个Request发送了多次）时，就会创建多条TCP连接，这些连接的区别只在于源端口号不同，而源端口号默认是内核分配的，内核是知道哪个App（precess）申请了创建了哪些TCP连接的，所以当创建一个NSURLSessionTask时内核会先创建一条tcp连接，然后根据相关策略生成一个类端口号的标示返回赋值给taskIdentifier。大体意思如下图所示。<br><img src="http://7xqh3q.com1.z0.glb.clouddn.com/Request-%3EResponse1.png =378x345" alt="Request-&gt;Response"></p>
+<p>因为可以确定发送请求时的tcp端口号，所以响应到来时根据tcp端口号就可以确定是哪个请求的响应了。可以看出图中的ResponseA是Request2的响应，ResponseB是Request1的响应。</p>
+<p>总而言之就是每条Http请求都有自己的tcp连接，相当于有独立的传输通道，所以就可以根据响应的通道标示来找出是哪个请求的响应。</p>
+<h3 id="u8BF7_u6C42_u8FDB_u5EA6progress_u5B9E_u73B0"><a href="#u8BF7_u6C42_u8FDB_u5EA6progress_u5B9E_u73B0" class="headerlink" title="请求进度progress实现"></a>请求进度progress实现</h3><p>请求progress主要由AFURLSessionManagerTaskDelegate类实现，该类有两个NSProgress属性，分别为uploadProgress和downloadProgress，在创建请求时AFURLSessionManagerTaskDelegate让uploadProgress和downloadProgress使用KVO监听了NSURLSessionTask的属性(countOfBytesReceived、countOfBytesExpectedToReceive、countOfBytesSent、countOfBytesExpectedToSend)，所以在接收到请求数据后progress能实时响应。</p>
+<h3 id="u4E09_u6761_u7EBF_u7A0B"><a href="#u4E09_u6761_u7EBF_u7A0B" class="headerlink" title="三条线程"></a>三条线程</h3><ul>
+<li><p>处理系统网络响应数据线程:NSOperationQueue创建,NSOperationQueue是在初始化AFURLSessionManager时创建的。</p>
+</li>
+<li><p>解析ResponseData线程：url_session_manager_processing_queue，AFNetworking私有队列，并行队列。</p>
+</li>
+<li><p>回调业务请求线程：于业务completionQueue一致，如果没指定则为主线程。</p>
+</li>
 </ul>
-<p>如果你能管理RunLoop的话优先选用配置超时时间这种方法，因为这种方法可以让RunLoop正常地退出（在退出前可以给Observer发送相关通知），这两种方法的示例代码如下：</p>
-<pre><code>//超时退出RunLoop
-NSDate *timeoutDate = [NSDate dateWithTimeIntervalSinceNow:10];
-[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:timeoutDate];
-//显示地退出RunLoop
-CFRunLoopRef currentRunLoopRef = [[NSRunLoop currentRunLoop] getCFRunLoop];
-CFRunLoopStop(currentRunLoopRef);
-</code></pre><h2 id="u53C2_u8003_u6587_u732E"><a href="#u53C2_u8003_u6587_u732E" class="headerlink" title="参考文献"></a>参考文献</h2><p><a href="https://developer.apple.com/library/prerelease/ios/documentation/Cocoa/Conceptual/Multithreading/RunLoopManagement/RunLoopManagement.html#//apple_ref/doc/uid/10000057i-CH16-SW4" target="_blank" rel="external">Threading Programming Guide</a></p>
+<h3 id="block_u4FEE_u9970_u7B26"><a href="#block_u4FEE_u9970_u7B26" class="headerlink" title="__block修饰符"></a>__block修饰符</h3><p>__block表示为引用传递，共享内存，在AFNetworking中有如下代码：</p>
+<pre><code>__block NSURLSessionDataTask *dataTask = nil;
+    dataTask = [self dataTaskWithRequest:request
+                          uploadProgress:uploadProgress
+                        downloadProgress:downloadProgress
+                       completionHandler:^(NSURLResponse * __unused response, id responseObject, NSError *error) {
+        if (error) {
+            if (failure) {
+                failure(dataTask, error);
+            }
+        } else {
+            if (success) {
+                success(dataTask, responseObject);
+            }
+        }
+    }];
+</code></pre><p>如果上述<strong>block NSURLSessionDataTask *dataTask = nil没用</strong>block修饰的话，则failure(dataTask, error)和success(dataTask, responseObject)中dataTask始终为nil，因为block捕获了dataTask = nil不会再改变,<strong>根本原因是block默认是值拷贝</strong>，所以此处需要增加__block。</p>
 </span>
       
     </div>
@@ -307,17 +315,13 @@ CFRunLoopStop(currentRunLoopRef);
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/01/25/窥探NSOperation/" rel="next" title="窥探NSOperation">
-                <i class="fa fa-chevron-left"></i> 窥探NSOperation
+              <a href="/2016/02/21/iOS中圆角图片处理/" rel="next" title="iOS中圆角图片处理">
+                <i class="fa fa-chevron-left"></i> iOS中圆角图片处理
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/02/16/估计是史上最简单的自定义进度条实现/" rel="prev" title="估计是史上最简单的自定义进度条实现">
-                估计是史上最简单的自定义进度条实现 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -344,8 +348,8 @@ CFRunLoopStop(currentRunLoopRef);
         
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2016/01/31/初识RunLoop/"
-           data-title="初识RunLoop" data-url="http://nerdfooprogrammer.github.io/2016/01/31/初识RunLoop/">
+      <div class="ds-thread" data-thread-key="2016/07/03/AFNetworking3.1源码解读<一>/"
+           data-title="AFNetworking3.1源码解读<一>" data-url="http://nerdfooprogrammer.github.io/2016/07/03/AFNetworking3.1源码解读<一>/">
       </div>
     
   </div>
@@ -452,7 +456,7 @@ CFRunLoopStop(currentRunLoopRef);
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#RunLoop_u89E3_u5256"><span class="nav-number">1.</span> <span class="nav-text">RunLoop解剖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RunLoop_u521B_u5EFA"><span class="nav-number">2.</span> <span class="nav-text">RunLoop创建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RunLoop_u8FD0_u884C"><span class="nav-number">3.</span> <span class="nav-text">RunLoop运行</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RunLoop_u8FD0_u884C_u6A21_u5F0F"><span class="nav-number">4.</span> <span class="nav-text">RunLoop运行模式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RunLoop_u4E8B_u4EF6_u987A_u5E8F"><span class="nav-number">5.</span> <span class="nav-text">RunLoop事件顺序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RunLoop_u6DFB_u52A0_u4E8B_u4EF6_u6E90"><span class="nav-number">6.</span> <span class="nav-text">RunLoop添加事件源</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RunLoop_u9000_u51FA"><span class="nav-number">7.</span> <span class="nav-text">RunLoop退出</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#u53C2_u8003_u6587_u732E"><span class="nav-number">8.</span> <span class="nav-text">参考文献</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Session"><span class="nav-number">1.</span> <span class="nav-text">Session</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#u521D_u59CB_u5316"><span class="nav-number">2.</span> <span class="nav-text">初始化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#u6838_u5FC3_u7EC4_u4EF6_u901A_u4FE1"><span class="nav-number">3.</span> <span class="nav-text">核心组件通信</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#u5173_u952E_u6280_u672F"><span class="nav-number">4.</span> <span class="nav-text">关键技术</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#u54CD_u5E94-_26gt_3B_u8BF7_u6C42_u6620_u5C04"><span class="nav-number">4.1.</span> <span class="nav-text">响应->请求映射</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u8BF7_u6C42_u8FDB_u5EA6progress_u5B9E_u73B0"><span class="nav-number">4.2.</span> <span class="nav-text">请求进度progress实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u4E09_u6761_u7EBF_u7A0B"><span class="nav-number">4.3.</span> <span class="nav-text">三条线程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#block_u4FEE_u9970_u7B26"><span class="nav-number">4.4.</span> <span class="nav-text">__block修饰符</span></a></li></ol></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator">
