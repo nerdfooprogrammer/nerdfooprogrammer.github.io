@@ -35,7 +35,7 @@
 <link href="/css/main.css?v=0.4.5.2" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="block," />
+  <meta name="keywords" content="Hexo, NexT" />
 
 
 
@@ -53,16 +53,17 @@
 
 
 
-<meta name="description" content="Block是iOS4引入的功能，灵活运用Block可使代码简洁易读，本文通过Block是什么、Block和函数的区别以及__block的意义等方面展开讲解。">
+<meta name="description" content="上篇文章AFNetworking3.1源码解读&amp;lt;一&amp;gt;主要学习了Session相关部分，本篇主要学习Serialization中的AFURLRequestSerialization部分。AFURLRequestSerialization顾名思义是请求序列化，也就是创建出符合HTTP协议的GET、POST、HEAD、PUT、DELETE等请求。在AFNetworking中RequstSer">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Objective-C之Block二三事">
-<meta property="og:url" content="http://nerdfooprogrammer.github.io/2016/01/04/Objective-C之block二三事/index.html">
+<meta property="og:title" content="AFNetworking3.1源码解读<二>">
+<meta property="og:url" content="http://nerdfooprogrammer.github.io/2016/07/29/AFNetworking3-1源码解读-二/index.html">
 <meta property="og:site_name" content="NerdFooProgrammer's blog">
-<meta property="og:description" content="Block是iOS4引入的功能，灵活运用Block可使代码简洁易读，本文通过Block是什么、Block和函数的区别以及__block的意义等方面展开讲解。">
-<meta property="og:updated_time" content="2016-01-19T14:44:52.000Z">
+<meta property="og:description" content="上篇文章AFNetworking3.1源码解读&amp;lt;一&amp;gt;主要学习了Session相关部分，本篇主要学习Serialization中的AFURLRequestSerialization部分。AFURLRequestSerialization顾名思义是请求序列化，也就是创建出符合HTTP协议的GET、POST、HEAD、PUT、DELETE等请求。在AFNetworking中RequstSer">
+<meta property="og:image" content="http://7xqh3q.com1.z0.glb.clouddn.com/NSURLRequestSerialization.png">
+<meta property="og:updated_time" content="2016-08-04T23:59:08.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Objective-C之Block二三事">
-<meta name="twitter:description" content="Block是iOS4引入的功能，灵活运用Block可使代码简洁易读，本文通过Block是什么、Block和函数的区别以及__block的意义等方面展开讲解。">
+<meta name="twitter:title" content="AFNetworking3.1源码解读<二>">
+<meta name="twitter:description" content="上篇文章AFNetworking3.1源码解读&amp;lt;一&amp;gt;主要学习了Session相关部分，本篇主要学习Serialization中的AFURLRequestSerialization部分。AFURLRequestSerialization顾名思义是请求序列化，也就是创建出符合HTTP协议的GET、POST、HEAD、PUT、DELETE等请求。在AFNetworking中RequstSer">
 
 
 
@@ -74,7 +75,7 @@
   };
 </script>
 
-  <title> Objective-C之Block二三事 | NerdFooProgrammer's blog </title>
+  <title> AFNetworking3.1源码解读<二> | NerdFooProgrammer's blog </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -204,7 +205,7 @@
             
             
               
-                Objective-C之Block二三事
+                AFNetworking3.1源码解读<二>
               
             
           </h1>
@@ -213,8 +214,8 @@
         <div class="post-meta">
           <span class="post-time">
             发表于
-            <time itemprop="dateCreated" datetime="2016-01-04T22:56:58+08:00" content="2016-01-04">
-              2016-01-04
+            <time itemprop="dateCreated" datetime="2016-07-29T07:44:41+08:00" content="2016-07-29">
+              2016-07-29
             </time>
           </span>
 
@@ -224,8 +225,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/01/04/Objective-C之block二三事/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/01/04/Objective-C之block二三事/" itemprop="commentsCount"></span>
+                <a href="/2016/07/29/AFNetworking3-1源码解读-二/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/07/29/AFNetworking3-1源码解读-二/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -244,184 +245,84 @@
       
 
       
-        <span itemprop="articleBody"><p>  Block是iOS4引入的功能，灵活运用Block可使代码简洁易读，本文通过Block是什么、Block和函数的区别以及__block的意义等方面展开讲解。<a id="more"></a></p>
-<h2 id="u4E00_u3001Block_u662F_u4EC0_u4E48"><a href="#u4E00_u3001Block_u662F_u4EC0_u4E48" class="headerlink" title="一、Block是什么"></a>一、Block是什么</h2><p>  Block是能自动截取自动变量的匿名函数，其本质是Objective-C的对象。想要了解Block的本质需要借助clang 的－rewrite-objc(将Objective-C代码转换成C++)命令，假设Objective-C的Block代码如下：</p>
-<pre><code>#include&quot;stdio.h&quot;
-int main()
-{    
-    int val = 10;
-        void (^blk)(void) = ^{
-    printf(&quot;val = %d\n&quot;,val);
-    };
-    blk();
-    return 0;
+        <span itemprop="articleBody"><p>上篇文章<a href="http://nerdfooprogrammer.github.io/2016/07/03/AFNetworking3.1源码解读%3C一%3E/">AFNetworking3.1源码解读&lt;一&gt;</a>主要学习了Session相关部分，本篇主要学习Serialization中的AFURLRequestSerialization部分。AFURLRequestSerialization顾名思义是请求序列化，也就是创建出符合HTTP协议的GET、POST、HEAD、PUT、DELETE等请求。在AFNetworking中RequstSerialization主要实现了普通请求和multipart/form-data请求的序列化。</p>
+<a id="more"></a>
+<h3 id="u666E_u901A_u8BF7_u6C42_u5E8F_u5217_u5316"><a href="#u666E_u901A_u8BF7_u6C42_u5E8F_u5217_u5316" class="headerlink" title="普通请求序列化"></a>普通请求序列化</h3><h4 id="HTTP_Method__u662FGET_u3001HEAD_u3001DELETE"><a href="#HTTP_Method__u662FGET_u3001HEAD_u3001DELETE" class="headerlink" title="HTTP Method 是GET、HEAD、DELETE"></a>HTTP Method 是GET、HEAD、DELETE</h4><p>如果HTTP Method 是GET、HEAD、DELETE则请求会被序列化成Query String,比如在bing里面搜索<code>helloworld</code>后请求的URL为</p>
+<blockquote>
+<p><a href="https://www.bing.com/search?q=helloworld&amp;go=Submit&amp;qs=n&amp;form=QBLH&amp;pq=helloworld&amp;sc=8-10&amp;sp=-1&amp;sk=&amp;cvid=C1DAD98D70EA4C0CB1B38F3E04016570" target="_blank" rel="external">https://www.bing.com/search?q=helloworld&amp;go=Submit&amp;qs=n&amp;form=QBLH&amp;pq=helloworld&amp;sc=8-10&amp;sp=-1&amp;sk=&amp;cvid=C1DAD98D70EA4C0CB1B38F3E04016570</a> </p>
+</blockquote>
+<p>其中q=helloworld&amp;go=Submit&amp;qs=n&amp;form=QBLH&amp;pq=helloworld&amp;sc=8-10&amp;sp=-1&amp;sk=&amp;cvid=C1DAD98D70EA4C0CB1B38F3E04016570就是查询字符串，参数间用&amp;分割，参数如果是嵌套Dictionary怎会变成[key][key1]=[value1]&amp;[key][key2]=[value2],如果是嵌套的是Array怎会变成key[]=value1&amp;key[]=value2。在AFNetworking中Query string请求序列化一定得是NSDctionary类型。</p>
+<h4 id="u5176_u4ED6"><a href="#u5176_u4ED6" class="headerlink" title="其他"></a>其他</h4><p>其他主要指的是POST请求，POST请求序列化时分为AFURLRequestSerialization、AFJSONRequestSerializer、AFPropertyListRequestSerializer，前者是后两者的父类，这三者的区别为，当请求序列化是AFURLRequestSerialization时，Content-Type=application/x-www-form-urlencoded,body存放的是QueryString;当请求序列化是AFJSONRequestSerializer时，Content-Type＝application/json，body存放的是输入参数的JSON格式;当请求是AFPropertyListRequestSerializer时，Content-Type＝application/x-plist，body是plist格式的数据。</p>
+<h3 id="multipart/form-data_u8BF7_u6C42_u5E8F_u5217_u5316"><a href="#multipart/form-data_u8BF7_u6C42_u5E8F_u5217_u5316" class="headerlink" title="multipart/form-data请求序列化"></a>multipart/form-data请求序列化</h3><p>首先来看下mulitpart/form-data协议格式:</p>
+<p>HTTP Header部分：<br>需要指定ContentType: multipart/form-data; boundary=Sample-Boundary.</p>
+<p>HTTP Body部分：</p>
+<p>–Sample-Boundary(换行)</p>
+<p>Content-Disposition: form-data; name=”xxx”; filename=”xxx.xx”(换行)</p>
+<p>Content-Type :MIME类型(换行)</p>
+<p>(再换行)</p>
+<p>helloworld(此处正文部分，helloworld表示要传输的内容，换行)</p>
+<p>(再换行)</p>
+<p>–Sample-Boundary(开始另一部分，内容格式与前面部分一致)</p>
+<p>Content-Disposition: form-data; name=”xxx”; filename=”xxx.xx”(换行)</p>
+<p>Content-Type :MIME类型(换行)</p>
+<p>(再换行)</p>
+<p>helloworld(此处正文部分，helloworld表示要传输的内容，换行)</p>
+<p>–Sample-Boundary–(结尾)<br>上述就是Multipart的协议格式，大体来说就是分为3个部分，分别为boundary(–Sample-Boundary,–Sample-Boundary–),header(Content-Disposition: form-data; name=”xxx”; filename=”xxx.xx”,Content-Type :MIME类型),内容(helloworld)。下面就讲下AFNetworking是如果实现上述3部分协议格式的。</p>
+<h4 id="Boundary"><a href="#Boundary" class="headerlink" title="Boundary"></a>Boundary</h4><p>因为协议中有开始Boundary、中间Boundary、结束Boundary，所以AFNetworking中定义了3个全局的boundary函数(其中boundary是随机生成的):AFMultipartFormInitialBoundary、AFMultipartFormEncapsulationBoundary、AFMultipartFormFinalBoundary<br>,例如AFMultipartFormInitialBoundary的实现为：</p>
+<pre><code>static inline NSString * AFMultipartFormInitialBoundary(NSString *boundary) {
+    return [NSString stringWithFormat:@&quot;--%@%@&quot;, boundary, kAFMultipartFormCRLF];
 }
-</code></pre><p>经过－rewrite-objc转换后变成如下的C＋＋代码:</p>
-<pre><code>//描述Block最小单元，主要成员是void *FuncPtr,指向Block代表的匿名函数。
-struct __block_impl {
-  void *isa;
-  int Flags;
-  int Reserved;
-  void *FuncPtr;
-};
-
-//该结构体即代表Block,结构体中int val就是自动截取的变量（初始化时用Block中需要访问的值来赋值），struct __block_impl中最主要的就是void *FuncPtr，用来指向Block代表的匿名函数。
-struct __main_block_impl_0 {
-  struct __block_impl impl;
-  struct __main_block_desc_0* Desc;
-  int val;
-  __main_block_impl_0(void *fp, struct __main_block_desc_0 *desc, int _val, int flags=0) : val(_val) {
-    impl.isa = &amp;_NSConcreteStackBlock;
-    impl.Flags = flags;
-    impl.FuncPtr = fp;
-    Desc = desc;
-  }
-};
-
-//Block代表的匿名函数，即本文中的“printf(&quot;val = %d\n&quot;,val);”
-static void __main_block_func_0(struct __main_block_impl_0 *__cself) {
-  int val = __cself-&gt;val; // bound by copy
-
- printf(&quot;val = %d\n&quot;,val);
+</code></pre><h4 id="Header"><a href="#Header" class="headerlink" title="Header"></a>Header</h4><p>这里的header主要是指Content-Disposition: form-data; name=”xxx”; filename=”xxx.xx”和,Content-Type :MIME类型，AFNetworking在实现multipart/form-data传输时定义了一个叫做<strong>AFMultipartFormData</strong>的protocol,使用者需要实现该protocol，该protocol的接口类似</p>
+<pre><code>- (BOOL)appendPartWithFileURL:(NSURL *)fileURL
+                         name:(NSString *)name
+                        error:(NSError * _Nullable __autoreleasing *)error;
+</code></pre><p>从上面的接口就可以确定header了，filename=[fileURL lastPathComponent],name使用者提供，MIME类型是通过fileURL的扩展名计算出来的，具体计算代码如下:</p>
+<pre><code>static inline NSString * AFContentTypeForPathExtension(NSString *extension) {
+    NSString *UTI = (__bridge_transfer NSString *)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)extension, NULL);
+    NSString *contentType = (__bridge_transfer NSString *)UTTypeCopyPreferredTagWithClass((__bridge CFStringRef)UTI, kUTTagClassMIMEType);
+    if (!contentType) {
+        return @&quot;application/octet-stream&quot;;
+    } else {
+        return contentType;
     }
-
-static struct __main_block_desc_0 {
-  size_t reserved;
-  size_t Block_size;
-} __main_block_desc_0_DATA = { 0, sizeof(struct __main_block_impl_0)};
-
-int main()
-{
-    int val = 10;
-    //Block定义
-     void (*blk)(void) = ((void (*)())&amp;__main_block_impl_0((void *)__main_block_func_0, &amp;__main_block_desc_0_DATA, val));
-     //Block调用
-    ((void (*)(__block_impl *))((__block_impl *)blk)-&gt;FuncPtr)((__block_impl *)blk);
-    return 0;
 }
-</code></pre><p>从上面可以看出<code>Block</code>转变成了<code>struct __main_block_impl_0</code>，自动截获的<code>val</code>也变成了结构体的成员变量，然后在结构体的构造函数中用需要截获的变量值进行初始化。至此可以清晰地看出<code>Blcok</code>的本质是<code>struct</code>,是Objective-C的对象。</p>
-<h2 id="u4E8C_u3001Block_u548C_u51FD_u6570_u7684_u533A_u522B"><a href="#u4E8C_u3001Block_u548C_u51FD_u6570_u7684_u533A_u522B" class="headerlink" title="二、Block和函数的区别"></a>二、Block和函数的区别</h2><ul>
-<li>静态与动态</li>
-</ul>
-<p>Block是Objective－C对象，既然是对象，那么就是运行时的产物，只有运行的时候才能确定；而函数代表的是地址，它是静态的，在编译器就确定了。所以Block与函数最大的区别就是产生的时机不同。</p>
-<ul>
-<li>嵌套定义</li>
-</ul>
-<p>Block可以嵌套定义，比如:</p>
-<pre><code>void main()
-{
-    void (^externalBlock)(void) = ^(void){
-        void(^internalBlock)(void) = ^(void){
-            NSLog(@&quot;internalBlock&quot;);
-        };
-        internalBlock();
-    };
-    externalBlock();
-}
-</code></pre><p>但函数却不能嵌套定义，比如你不能编写这样的函数：</p>
-<pre><code>void main()
-{
-    void fun1(void)
-    {
-        void fun2(void);
-        {
-            printf(&quot;fun2&quot;);
+</code></pre><p>另外AFMultipartFormData protocol也提供了由使用者指定filname、name、MIME type等的接口，具体科参考AFMultipartFormData。</p>
+<h4 id="content_28_u5185_u5BB9_29"><a href="#content_28_u5185_u5BB9_29" class="headerlink" title="content(内容)"></a>content(内容)</h4><p>AFNetworking主要是通过NSInputStream来管理输入内容的，具体做法是定义了两个类，一个AFMultipartBodyStream继承自NSInputStream，负责直接对接NSURLRequest的HTTPBodyStream；另一个类是AFHTTPBodyPart,主要负责multipart中具体的某一部分，整体类结构如下图所示:<br><img src="http://7xqh3q.com1.z0.glb.clouddn.com/NSURLRequestSerialization.png" alt="multipartStruct"></p>
+<p>这里需要注意的是：AFMultipartBodyStream继承自NSInputStream，而NSInputStream是一个abstract类，所以需要自己实现NSInputStream的所有方法；而AFMultipartFormData protocol中每一个接口相当于产生了一个AFHTTPBodyPart，负责该部分的boundary、header、body，这三部分构成了一个大的输入，而这个大的输入是通过NSInputStream输入到AFMultipartBodyStream继而输入到NSURLRequest的HTTPBodyStream中，相关代码如下：</p>
+<pre><code>- (NSInputStream *)inputStream {
+    if (!_inputStream) {
+        if ([self.body isKindOfClass:[NSData class]]) {
+            _inputStream = [NSInputStream inputStreamWithData:self.body];
+        } else if ([self.body isKindOfClass:[NSURL class]]) {
+            _inputStream = [NSInputStream inputStreamWithURL:self.body];
+        } else if ([self.body isKindOfClass:[NSInputStream class]]) {
+            _inputStream = self.body;
+        } else {
+            _inputStream = [NSInputStream inputStreamWithData:[NSData data]];
         }
-        fun2();
-    }
-}
-</code></pre><h2 id="u4E09_u3001__block_u4FEE_u9970_u7B26_u7684_u542B_u4E49"><a href="#u4E09_u3001__block_u4FEE_u9970_u7B26_u7684_u542B_u4E49" class="headerlink" title="三、__block修饰符的含义"></a>三、__block修饰符的含义</h2><p>当我们想要在Block内部修改某个<strong>自动局部变量</strong>时,必须在自动局部变量前加上__block修饰符。那么大家想过为什么一定要加__block呢，不加__block为什么就不能修改呢？想要回答这写问题可以从本文的第一小节入手。<br>在第一小节中自动局部变量<code>val</code>经过编译器转换后变成<code>struct __main_block_impl_0</code>中个一个成员<code>int val</code>，然后在<code>struct __main_block_impl_0</code>的构造函数中用截获的自动变量<code>_val</code>的值初始化<code>struct __main_block_impl_0</code>的成员<code>int val</code>，从整个构造过程可以看出<code>val</code>是值传递而不是引用传递，所以在Block中是修改不了Block外部的自动变量的值，这个问题就好比如大家都学过的swap函数，要想能交换两个变量的值，swap函数的形参必须是地址。<br>那么增加__block修饰符变换后的C++代码是什么样子呢？我们依然用clang 的－rewrite-objc命令，假设Block源码为：</p>
-<pre><code>#include&quot;stdio.h&quot;
-int main()
-{    
-    __block int val = 10;
-        void (^blk)(void) = ^{
-            val = 11;
-            printf(&quot;val = %d\n&quot;,val);
-    };
-    blk();
-    return 0;
-}
-</code></pre><p>转换后变成：</p>
-<pre><code>//__block修改的自动变量变成了一个struct，然后struct中有一个成员保存自动变量的值
-struct __Block_byref_val_0 {
-  void *__isa;
-__Block_byref_val_0 *__forwarding;
- int __flags;
- int __size;
- int val;
-};
-
-//从构造函数可以看出用__block修饰的变量是用引用传递的，故而能修改外部自动变量的值
-struct __main_block_impl_0 {
-  struct __block_impl impl;
-  struct __main_block_desc_0* Desc;
-  __Block_byref_val_0 *val; // by ref
-  __main_block_impl_0(void *fp, struct __main_block_desc_0 *desc, __Block_byref_val_0 *_val, int flags=0) : val(_val-&gt;__forwarding) {
-    impl.isa = &amp;_NSConcreteStackBlock;
-    impl.Flags = flags;
-    impl.FuncPtr = fp;
-    Desc = desc;
-  }
-};
-
-static void __main_block_func_0(struct __main_block_impl_0 *__cself) {
-  __Block_byref_val_0 *val = __cself-&gt;val; // bound by ref
-
-         (val-&gt;__forwarding-&gt;val) = 11;
-         printf(&quot;val = %d\n&quot;,(val-&gt;__forwarding-&gt;val));
     }
 
-static void __main_block_copy_0(struct __main_block_impl_0*dst, struct __main_block_impl_0*src) {_Block_object_assign((void*)&amp;dst-&gt;val, (void*)src-&gt;val, 8/*BLOCK_FIELD_IS_BYREF*/);}
-
-static void __main_block_dispose_0(struct __main_block_impl_0*src) {_Block_object_dispose((void*)src-&gt;val, 8/*BLOCK_FIELD_IS_BYREF*/);}
-
-static struct __main_block_desc_0 {
-  size_t reserved;
-  size_t Block_size;
-  void (*copy)(struct __main_block_impl_0*, struct __main_block_impl_0*);
-  void (*dispose)(struct __main_block_impl_0*);
-} __main_block_desc_0_DATA = { 0, sizeof(struct __main_block_impl_0), __main_block_copy_0, __main_block_dispose_0};
-
-int main()
-{
-    __attribute__((__blocks__(byref))) __Block_byref_val_0 val = {(void*)0,(__Block_byref_val_0 *)&amp;val, 0, sizeof(__Block_byref_val_0), 10};
-     void (*blk)(void) = ((void (*)())&amp;__main_block_impl_0((void *)__main_block_func_0, &amp;__main_block_desc_0_DATA, (__Block_byref_val_0 *)&amp;val, 570425344));
-    ((void (*)(__block_impl *))((__block_impl *)blk)-&gt;FuncPtr)((__block_impl *)blk);
-    return 0;
+    return _inputStream;
 }
-</code></pre><p>从转换后的C++代码可以看出用<code>__block</code>修饰的变量最后变化成了一个<code>struct</code>，然后<code>struct</code>中有一个成员变量<code>val</code>存储着自动变量的值，一个成员<code>__forwarding</code>存储着外部变量的地址，犹如这行代码所说明的</p>
-<pre><code>__attribute__((__blocks__(byref))) __Block_byref_val_0 val = {(void*)0,(__Block_byref_val_0 *)&amp;val, 0, sizeof(__Block_byref_val_0), 10};
-</code></pre><p>在构造Block中时传递的是<code>(__Block_byref_val_0 *)&amp;val</code>,也就是说用__block修饰的变量是通过引用传递被Block所捕获的，所以可以在Block内部修改外面的自动局部变量。</p>
-<p><em>PS:想在Block内部修改Block外部的变量，除了用__block修饰符外，也可以把变量定义为<strong>静态局部变量、静态全局变量、全局变量</strong></em>。</p>
+</code></pre><p>本篇完～</p>
 </span>
       
     </div>
 
     <footer class="post-footer">
       
-        <div class="post-tags">
-          
-            <a href="/tags/block/" rel="tag">#block</a>
-          
-        </div>
-      
 
       
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/01/03/Singleton/" rel="next" title="Objective-C之严格单例模式正确实现">
-                <i class="fa fa-chevron-left"></i> Objective-C之严格单例模式正确实现
+              <a href="/2016/07/03/AFNetworking3.1源码解读<一>/" rel="next" title="AFNetworking3.1源码解读<一>">
+                <i class="fa fa-chevron-left"></i> AFNetworking3.1源码解读<一>
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/01/13/浅析GCD/" rel="prev" title="浅析GCD">
-                浅析GCD <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -448,8 +349,8 @@ int main()
         
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2016/01/04/Objective-C之block二三事/"
-           data-title="Objective-C之Block二三事" data-url="http://nerdfooprogrammer.github.io/2016/01/04/Objective-C之block二三事/">
+      <div class="ds-thread" data-thread-key="2016/07/29/AFNetworking3-1源码解读-二/"
+           data-title="AFNetworking3.1源码解读<二>" data-url="http://nerdfooprogrammer.github.io/2016/07/29/AFNetworking3-1源码解读-二/">
       </div>
     
   </div>
@@ -556,7 +457,7 @@ int main()
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#u4E00_u3001Block_u662F_u4EC0_u4E48"><span class="nav-number">1.</span> <span class="nav-text">一、Block是什么</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#u4E8C_u3001Block_u548C_u51FD_u6570_u7684_u533A_u522B"><span class="nav-number">2.</span> <span class="nav-text">二、Block和函数的区别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#u4E09_u3001__block_u4FEE_u9970_u7B26_u7684_u542B_u4E49"><span class="nav-number">3.</span> <span class="nav-text">三、__block修饰符的含义</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#u666E_u901A_u8BF7_u6C42_u5E8F_u5217_u5316"><span class="nav-number">1.</span> <span class="nav-text">普通请求序列化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTP_Method__u662FGET_u3001HEAD_u3001DELETE"><span class="nav-number">1.1.</span> <span class="nav-text">HTTP Method 是GET、HEAD、DELETE</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#u5176_u4ED6"><span class="nav-number">1.2.</span> <span class="nav-text">其他</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#multipart/form-data_u8BF7_u6C42_u5E8F_u5217_u5316"><span class="nav-number">2.</span> <span class="nav-text">multipart/form-data请求序列化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Boundary"><span class="nav-number">2.1.</span> <span class="nav-text">Boundary</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Header"><span class="nav-number">2.2.</span> <span class="nav-text">Header</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#content_28_u5185_u5BB9_29"><span class="nav-number">2.3.</span> <span class="nav-text">content(内容)</span></a></li></ol></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator">
