@@ -53,28 +53,16 @@
 
 
 
-<meta name="description" content="一款APP中对图片圆角的处理还是比较常见的，比如用户头像。iOS中处理图片圆角有3种方法，分别为：
-
-CALayer的cornerRadius和masksToBounds的配合；
-CALayer的mask；
-利用CoreGraphics clip相应的圆角图像。">
+<meta name="description" content="上篇文章AFNetworking3.1源码解读&amp;lt;二&amp;gt;主要学习了Request Serialization相关部分，本篇主要学习Response Serialization，AFNetworking中一共实现了6种学习Response Serialization，分别为：AFURLResponseSerialization、AFJSONResponseSerializer、AFXMLPa">
 <meta property="og:type" content="article">
-<meta property="og:title" content="iOS中圆角图片处理">
-<meta property="og:url" content="http://nerdfooprogrammer.github.io/2016/02/21/iOS中圆角图片处理/index.html">
+<meta property="og:title" content="AFNetworking3.1源码解读<三>">
+<meta property="og:url" content="http://nerdfooprogrammer.github.io/2016/08/24/AFNetworking3-1源码解读<三>/index.html">
 <meta property="og:site_name" content="NerdFooProgrammer's blog">
-<meta property="og:description" content="一款APP中对图片圆角的处理还是比较常见的，比如用户头像。iOS中处理图片圆角有3种方法，分别为：
-
-CALayer的cornerRadius和masksToBounds的配合；
-CALayer的mask；
-利用CoreGraphics clip相应的圆角图像。">
-<meta property="og:updated_time" content="2016-02-21T15:45:24.000Z">
+<meta property="og:description" content="上篇文章AFNetworking3.1源码解读&amp;lt;二&amp;gt;主要学习了Request Serialization相关部分，本篇主要学习Response Serialization，AFNetworking中一共实现了6种学习Response Serialization，分别为：AFURLResponseSerialization、AFJSONResponseSerializer、AFXMLPa">
+<meta property="og:updated_time" content="2016-08-25T15:06:54.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="iOS中圆角图片处理">
-<meta name="twitter:description" content="一款APP中对图片圆角的处理还是比较常见的，比如用户头像。iOS中处理图片圆角有3种方法，分别为：
-
-CALayer的cornerRadius和masksToBounds的配合；
-CALayer的mask；
-利用CoreGraphics clip相应的圆角图像。">
+<meta name="twitter:title" content="AFNetworking3.1源码解读<三>">
+<meta name="twitter:description" content="上篇文章AFNetworking3.1源码解读&amp;lt;二&amp;gt;主要学习了Request Serialization相关部分，本篇主要学习Response Serialization，AFNetworking中一共实现了6种学习Response Serialization，分别为：AFURLResponseSerialization、AFJSONResponseSerializer、AFXMLPa">
 
 
 
@@ -86,7 +74,7 @@ CALayer的mask；
   };
 </script>
 
-  <title> iOS中圆角图片处理 | NerdFooProgrammer's blog </title>
+  <title> AFNetworking3.1源码解读<三> | NerdFooProgrammer's blog </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -216,7 +204,7 @@ CALayer的mask；
             
             
               
-                iOS中圆角图片处理
+                AFNetworking3.1源码解读<三>
               
             
           </h1>
@@ -225,8 +213,8 @@ CALayer的mask；
         <div class="post-meta">
           <span class="post-time">
             发表于
-            <time itemprop="dateCreated" datetime="2016-02-21T23:22:39+08:00" content="2016-02-21">
-              2016-02-21
+            <time itemprop="dateCreated" datetime="2016-08-24T22:59:41+08:00" content="2016-08-24">
+              2016-08-24
             </time>
           </span>
 
@@ -236,8 +224,8 @@ CALayer的mask；
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/02/21/iOS中圆角图片处理/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/02/21/iOS中圆角图片处理/" itemprop="commentsCount"></span>
+                <a href="/2016/08/24/AFNetworking3-1源码解读<三>/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/08/24/AFNetworking3-1源码解读<三>/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -256,31 +244,39 @@ CALayer的mask；
       
 
       
-        <span itemprop="articleBody"><p>一款APP中对图片圆角的处理还是比较常见的，比如用户头像。iOS中处理图片圆角有3种方法，分别为：</p>
-<ol>
-<li>CALayer的cornerRadius和masksToBounds的配合；</li>
-<li>CALayer的mask；</li>
-<li>利用CoreGraphics clip相应的圆角图像。<a id="more"></a>
-方法1和方法2性能低下，具体解释参见：<br><a href="http://www.cocoachina.com/ios/20150803/12873.html" target="_blank" rel="external">小心别让圆角成了你列表的帧数杀手</a></li>
-</ol>
-<p>所以这儿主要讲解下方法3的实现，考虑到圆角处理是UIImageView中比较常见的处理，故而把圆角处理写在了分类中，以下是具体源码：</p>
-<pre><code>@implementation UIImageView (UIImageCorner)
+        <span itemprop="articleBody"><p>上篇文章<a href="http://nerdfooprogrammer.github.io/2016/07/29/AFNetworking3-1源码解读-二/">AFNetworking3.1源码解读&lt;二&gt;</a>主要学习了Request Serialization相关部分，本篇主要学习Response Serialization，AFNetworking中一共实现了6种学习Response Serialization，分别为：AFURLResponseSerialization、AFJSONResponseSerializer、AFXMLParserResponseSerializer、AFPropertyListResponseSerializer、AFImageResponseSerializer和AFCompoundResponseSerializer，我们使用的时候根据自身与服务器协商的数据格式选用相应的Response Serialization即可。</p>
+<a id="more"></a>
+<h3 id="u6570_u636E_u5408_u6CD5_u6027_u68C0_u67E5"><a href="#u6570_u636E_u5408_u6CD5_u6027_u68C0_u67E5" class="headerlink" title="数据合法性检查"></a>数据合法性检查</h3><p>合法性检查主要是根据ContentType和StatusCode来判断的，如过接收到的数据的ContentType不在可接受ContentTypeSets中或者HTTP StatusCode不是2xx，则认为数据非法,返回相应NSError，如果出现错误时想要查看RawData则可以通过userInfo[AFNetworkingOperationFailingURLResponseDataErrorKey]来查看。</p>
+<p>AFURLResponseSerialization的ContentType＝nil，StatusCode为2xx,其子类只改变了ContentType。</p>
+<p>AFJSONResponseSerializer可接受的ContentType为:</p>
+<p><code>[NSSet setWithObjects:@&quot;application/json&quot;, @&quot;text/json&quot;, @&quot;text/javascript&quot;, nil]</code></p>
+<p>AFXMLParserResponseSerializer可接受的ContentType为:</p>
+<p><code>[[NSSet alloc] initWithObjects:@&quot;application/xml&quot;, @&quot;text/xml&quot;, nil]</code></p>
+<p>AFPropertyListResponseSerializer可接受的ContentType为:</p>
+<p><code>[[NSSet alloc] initWithObjects:@&quot;application/x-plist&quot;, nil]</code></p>
+<p>AFImageResponseSerializer可接受的ContentType为:</p>
+<p><code>[[NSSet alloc] initWithObjects:@&quot;image/tiff&quot;, @&quot;image/jpeg&quot;, @&quot;image/gif&quot;, @&quot;image/png&quot;, @&quot;image/ico&quot;, @&quot;image/x-icon&quot;, @&quot;image/bmp&quot;, @&quot;image/x-bmp&quot;, @&quot;image/x-xbitmap&quot;, @&quot;image/x-win-bitmap&quot;, nil]</code></p>
+<p>AFCompoundResponseSerializer则由使用者根据自身场景对上述5种ResponseSerializer的组合。</p>
+<h3 id="RawData_u89E3_u7801"><a href="#RawData_u89E3_u7801" class="headerlink" title="RawData解码"></a>RawData解码</h3><p>所有的Response Serialization均实现了下面这个接口，该接口返回解码后的数据。</p>
+<pre><code>@protocol AFURLResponseSerialization 
 
-- (void)cornerRadius:(CGFloat)radius
-{
-    //创建一个图像上下文
-    UIGraphicsBeginImageContextWithOptions(self.bounds.size, NO, [UIScreen mainScreen].scale);
-    //创建一个内切圆路径
-    [[UIBezierPath bezierPathWithRoundedRect:CGRectMake(0, 0, self.bounds.size.width, self.bounds.size.height) cornerRadius:radius] addClip];
-    //在指定区域内绘制图像
-    [self.image drawInRect:self.bounds];
-    //从当前图像上下文中取出之前回执的图像
-    self.image = UIGraphicsGetImageFromCurrentImageContext();
-    //删除之前创建的图像上下文
-    UIGraphicsEndImageContext();
-}
+- (nullable id)responseObjectForResponse:(nullable NSURLResponse *)response
+                           data:(nullable NSData *)data
+                          error:(NSError * _Nullable __autoreleasing *)error
 
 @end
+</code></pre><p>AFURLResponseSerialization解码时不做任何处理，直接返回RawData。<br>AFJSONResponseSerializer返回JSON格式数据，核心代码如下:</p>
+<pre><code>responseObject = [NSJSONSerialization JSONObjectWithData:data options:self.readingOptions error:&amp;serializationError];
+</code></pre><p>AFXMLParserResponseSerializer返回XML格式数据，核心代码如下:</p>
+<pre><code>[[NSXMLParser alloc] initWithData:data];
+</code></pre><p>AFPropertyListResponseSerializer返回plist格式数据，核心代码如下:</p>
+<pre><code>responseObject = [NSPropertyListSerialization propertyListWithData:data options:self.readOptions format:NULL error:&amp;serializationError];
+</code></pre><p>AFImageResponseSerializer返回UIImage*格式数据，核心代码如下:</p>
+<pre><code>if (self.automaticallyInflatesResponseImage) {
+        return AFInflatedImageFromResponseWithDataAtScale((NSHTTPURLResponse *)response, data, self.imageScale);
+    } else {
+        return AFImageWithDataAtScale(data, self.imageScale);
+    }
 </code></pre></span>
       
     </div>
@@ -292,17 +288,13 @@ CALayer的mask；
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/02/17/温习iOS内存管理/" rel="next" title="温习iOS内存管理">
-                <i class="fa fa-chevron-left"></i> 温习iOS内存管理
+              <a href="/2016/07/29/AFNetworking3-1源码解读-二/" rel="next" title="AFNetworking3.1源码解读<二>">
+                <i class="fa fa-chevron-left"></i> AFNetworking3.1源码解读<二>
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/07/03/AFNetworking3.1源码解读<一>/" rel="prev" title="AFNetworking3.1源码解读<一>">
-                AFNetworking3.1源码解读<一> <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -329,8 +321,8 @@ CALayer的mask；
         
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2016/02/21/iOS中圆角图片处理/"
-           data-title="iOS中圆角图片处理" data-url="http://nerdfooprogrammer.github.io/2016/02/21/iOS中圆角图片处理/">
+      <div class="ds-thread" data-thread-key="2016/08/24/AFNetworking3-1源码解读<三>/"
+           data-title="AFNetworking3.1源码解读<三>" data-url="http://nerdfooprogrammer.github.io/2016/08/24/AFNetworking3-1源码解读<三>/">
       </div>
     
   </div>
@@ -437,7 +429,7 @@ CALayer的mask；
               
             
             
-              <p class="post-toc-empty">此文章未包含目录</p>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#u6570_u636E_u5408_u6CD5_u6027_u68C0_u67E5"><span class="nav-number">1.</span> <span class="nav-text">数据合法性检查</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RawData_u89E3_u7801"><span class="nav-number">2.</span> <span class="nav-text">RawData解码</span></a></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator">
