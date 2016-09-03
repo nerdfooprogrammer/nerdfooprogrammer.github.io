@@ -53,16 +53,16 @@
 
 
 
-<meta name="description" content="上篇文章AFNetworking3.1源码解读&amp;lt;二&amp;gt;主要学习了Request Serialization相关部分，本篇主要学习Response Serialization，AFNetworking中一共实现了6种学习Response Serialization，分别为：AFURLResponseSerialization、AFJSONResponseSerializer、AFXMLPa">
+<meta name="description" content="上篇文章AFNewworking3.1源码解读&amp;lt;三&amp;gt;主要学习了Response Serialization相关部分，着篇主要来学习Reachability和Security。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="AFNetworking3.1源码解读<三>">
-<meta property="og:url" content="http://nerdfooprogrammer.github.io/2016/08/24/AFNetworking3-1源码解读<三>/index.html">
+<meta property="og:title" content="AFNetworking3.1源码解读<四>">
+<meta property="og:url" content="http://nerdfooprogrammer.github.io/2016/08/31/AFNetworking3-1源码解读-四/index.html">
 <meta property="og:site_name" content="NerdFooProgrammer's blog">
-<meta property="og:description" content="上篇文章AFNetworking3.1源码解读&amp;lt;二&amp;gt;主要学习了Request Serialization相关部分，本篇主要学习Response Serialization，AFNetworking中一共实现了6种学习Response Serialization，分别为：AFURLResponseSerialization、AFJSONResponseSerializer、AFXMLPa">
-<meta property="og:updated_time" content="2016-08-25T15:06:55.000Z">
+<meta property="og:description" content="上篇文章AFNewworking3.1源码解读&amp;lt;三&amp;gt;主要学习了Response Serialization相关部分，着篇主要来学习Reachability和Security。">
+<meta property="og:updated_time" content="2016-09-03T13:37:53.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="AFNetworking3.1源码解读<三>">
-<meta name="twitter:description" content="上篇文章AFNetworking3.1源码解读&amp;lt;二&amp;gt;主要学习了Request Serialization相关部分，本篇主要学习Response Serialization，AFNetworking中一共实现了6种学习Response Serialization，分别为：AFURLResponseSerialization、AFJSONResponseSerializer、AFXMLPa">
+<meta name="twitter:title" content="AFNetworking3.1源码解读<四>">
+<meta name="twitter:description" content="上篇文章AFNewworking3.1源码解读&amp;lt;三&amp;gt;主要学习了Response Serialization相关部分，着篇主要来学习Reachability和Security。">
 
 
 
@@ -74,7 +74,7 @@
   };
 </script>
 
-  <title> AFNetworking3.1源码解读<三> | NerdFooProgrammer's blog </title>
+  <title> AFNetworking3.1源码解读<四> | NerdFooProgrammer's blog </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -204,7 +204,7 @@
             
             
               
-                AFNetworking3.1源码解读<三>
+                AFNetworking3.1源码解读<四>
               
             
           </h1>
@@ -213,8 +213,8 @@
         <div class="post-meta">
           <span class="post-time">
             发表于
-            <time itemprop="dateCreated" datetime="2016-08-24T22:59:41+08:00" content="2016-08-24">
-              2016-08-24
+            <time itemprop="dateCreated" datetime="2016-08-31T07:20:02+08:00" content="2016-08-31">
+              2016-08-31
             </time>
           </span>
 
@@ -224,8 +224,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/08/24/AFNetworking3-1源码解读<三>/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/08/24/AFNetworking3-1源码解读<三>/" itemprop="commentsCount"></span>
+                <a href="/2016/08/31/AFNetworking3-1源码解读-四/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/08/31/AFNetworking3-1源码解读-四/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -244,39 +244,48 @@
       
 
       
-        <span itemprop="articleBody"><p>上篇文章<a href="http://nerdfooprogrammer.github.io/2016/07/29/AFNetworking3-1源码解读-二/">AFNetworking3.1源码解读&lt;二&gt;</a>主要学习了Request Serialization相关部分，本篇主要学习Response Serialization，AFNetworking中一共实现了6种学习Response Serialization，分别为：AFURLResponseSerialization、AFJSONResponseSerializer、AFXMLParserResponseSerializer、AFPropertyListResponseSerializer、AFImageResponseSerializer和AFCompoundResponseSerializer，我们使用的时候根据自身与服务器协商的数据格式选用相应的Response Serialization即可。</p>
+        <span itemprop="articleBody"><p>上篇文章<a href="http://nerdfooprogrammer.github.io/2016/08/24/AFNetworking3-1源码解读%3C三%3E/">AFNewworking3.1源码解读&lt;三&gt;</a>主要学习了Response Serialization相关部分，着篇主要来学习Reachability和Security。</p>
 <a id="more"></a>
-<h3 id="u6570_u636E_u5408_u6CD5_u6027_u68C0_u67E5"><a href="#u6570_u636E_u5408_u6CD5_u6027_u68C0_u67E5" class="headerlink" title="数据合法性检查"></a>数据合法性检查</h3><p>合法性检查主要是根据ContentType和StatusCode来判断的，如过接收到的数据的ContentType不在可接受ContentTypeSets中或者HTTP StatusCode不是2xx，则认为数据非法,返回相应NSError，如果出现错误时想要查看RawData则可以通过userInfo[AFNetworkingOperationFailingURLResponseDataErrorKey]来查看。</p>
-<p>AFURLResponseSerialization的ContentType＝nil，StatusCode为2xx,其子类只改变了ContentType。</p>
-<p>AFJSONResponseSerializer可接受的ContentType为:</p>
-<p><code>[NSSet setWithObjects:@&quot;application/json&quot;, @&quot;text/json&quot;, @&quot;text/javascript&quot;, nil]</code></p>
-<p>AFXMLParserResponseSerializer可接受的ContentType为:</p>
-<p><code>[[NSSet alloc] initWithObjects:@&quot;application/xml&quot;, @&quot;text/xml&quot;, nil]</code></p>
-<p>AFPropertyListResponseSerializer可接受的ContentType为:</p>
-<p><code>[[NSSet alloc] initWithObjects:@&quot;application/x-plist&quot;, nil]</code></p>
-<p>AFImageResponseSerializer可接受的ContentType为:</p>
-<p><code>[[NSSet alloc] initWithObjects:@&quot;image/tiff&quot;, @&quot;image/jpeg&quot;, @&quot;image/gif&quot;, @&quot;image/png&quot;, @&quot;image/ico&quot;, @&quot;image/x-icon&quot;, @&quot;image/bmp&quot;, @&quot;image/x-bmp&quot;, @&quot;image/x-xbitmap&quot;, @&quot;image/x-win-bitmap&quot;, nil]</code></p>
-<p>AFCompoundResponseSerializer则由使用者根据自身场景对上述5种ResponseSerializer的组合。</p>
-<h3 id="RawData_u89E3_u7801"><a href="#RawData_u89E3_u7801" class="headerlink" title="RawData解码"></a>RawData解码</h3><p>所有的Response Serialization均实现了下面这个接口，该接口返回解码后的数据。</p>
-<pre><code>@protocol AFURLResponseSerialization 
+<h2 id="Reachability"><a href="#Reachability" class="headerlink" title="Reachability"></a>Reachability</h2><h4 id="u76D1_u542C_u7F51_u7EDC"><a href="#u76D1_u542C_u7F51_u7EDC" class="headerlink" title="监听网络"></a>监听网络</h4><p>reachability主要是基于底层框架SCNetworkReachability实现的，在startMonitoring中设置了网络状态变化时的回调函数，以及最重要的把reachability添加到了MainRunLoop中的kCFRunLoopCommonModes，这样就实现了监听事件一直存活（添加入MainRunLoop,reability相当于一个source），并且当网络状态发生变化时及时响应(设置了事件回调)。相关代码如下:</p>
+<pre><code>//设置callback
+SCNetworkReachabilitySetCallback(self.networkReachability, AFNetworkReachabilityCallback, &amp;context);
 
-- (nullable id)responseObjectForResponse:(nullable NSURLResponse *)response
-                           data:(nullable NSData *)data
-                          error:(NSError * _Nullable __autoreleasing *)error
-
-@end
-</code></pre><p>AFURLResponseSerialization解码时不做任何处理，直接返回RawData。<br>AFJSONResponseSerializer返回JSON格式数据，核心代码如下:</p>
-<pre><code>responseObject = [NSJSONSerialization JSONObjectWithData:data options:self.readingOptions error:&amp;serializationError];
-</code></pre><p>AFXMLParserResponseSerializer返回XML格式数据，核心代码如下:</p>
-<pre><code>[[NSXMLParser alloc] initWithData:data];
-</code></pre><p>AFPropertyListResponseSerializer返回plist格式数据，核心代码如下:</p>
-<pre><code>responseObject = [NSPropertyListSerialization propertyListWithData:data options:self.readOptions format:NULL error:&amp;serializationError];
-</code></pre><p>AFImageResponseSerializer返回UIImage*格式数据，核心代码如下:</p>
-<pre><code>if (self.automaticallyInflatesResponseImage) {
-        return AFInflatedImageFromResponseWithDataAtScale((NSHTTPURLResponse *)response, data, self.imageScale);
-    } else {
-        return AFImageWithDataAtScale(data, self.imageScale);
+//添加入RunLoop   SCNetworkReachabilityScheduleWithRunLoop(self.networkReachability, CFRunLoopGetMain(), kCFRunLoopCommonModes);
+</code></pre><h4 id="u7F51_u7EDC_u72B6_u6001_u83B7_u53D6"><a href="#u7F51_u7EDC_u72B6_u6001_u83B7_u53D6" class="headerlink" title="网络状态获取"></a>网络状态获取</h4><ol>
+<li>直接获取reachable(有网)、reachableViaWWAN(移动网络)、reachableViaWiFi(Wi-Fi网络)属性。</li>
+<li>监听<code>AFNetworkingReachabilityDidChangeNotification</code>通知，ReachabilityManager会在网路状态发生变化时主动发送通知。</li>
+<li>设置网络状态发生变化时的block，setReachabilityStatusChangeBlock:在网络发生变化时也会回调。</li>
+<li>KVO reachable、reachableViaWWAN、reachableViaWiFi,当网络网络状态变化时Reability会主动更新这些属性值，所以如果KVO了这些属性就能实时获取到网络状态了。这三个属性的值都依赖网路状态属性，所以AFNetworkReachabilityManager实现了keyPathsForValuesAffectingValueForKey方法，相关代码如下:</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">+  (NSSet *)keyPathsForValuesAffectingValueForKey:(NSString *)key &#123;&#10;  if ([key isEqualToString:@&#34;reachable&#34;] || [key isEqualToString:@&#34;reachableViaWWAN&#34;] || [key isEqualToString:@&#34;reachableViaWiFi&#34;]) &#123;&#10;      return [NSSet setWithObject:@&#34;networkReachabilityStatus&#34;];&#10;  &#125;&#10;  return [super keyPathsForValuesAffectingValueForKey:key];&#10;  &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="u505C_u6B62_u76D1_u542C_u7F51_u7EDC"><a href="#u505C_u6B62_u76D1_u542C_u7F51_u7EDC" class="headerlink" title="停止监听网络"></a>停止监听网络</h4><p>停止监听网络非常简单，只需把reability事件从MainRunloop中删除即可，相关代码如下:</p>
+<pre><code>- (void)stopMonitoring {
+    if (!self.networkReachability) {
+        return;
     }
+SCNetworkReachabilityUnscheduleFromRunLoop(self.networkReachability, CFRunLoopGetMain(), kCFRunLoopCommonModes);
+}
+</code></pre><h2 id="Security"><a href="#Security" class="headerlink" title="Security"></a>Security</h2><p>AFNetworking支持3种Security policy，分别为AFSSLPinningModeNone、AFSSLPinningModePublicKey、AFSSLPinningModeCertificate。当Security policy为AFSSLPinningModeNone时只校验服务器发送的证书是否合法；当Security policy为AFSSLPinningModePublicKey时则通过校验本地certificate中public key和服务器发送的certificate中public key来验证合法性；当Security policy为AFSSLPinningModeCertificate时校验本地certificate和服务器发送的certificate来验证合法性。</p>
+<h4 id="certificate_u83B7_u53D6"><a href="#certificate_u83B7_u53D6" class="headerlink" title="certificate获取"></a>certificate获取</h4><p>AFNetworking会默认获取编译工程中.cer文件，而.cer就是certificate，pinnedCertificates属性中存放着这些.cer文件内容。相关代码如下:</p>
+<pre><code>+ (NSSet *)certificatesInBundle:(NSBundle *)bundle {
+    NSArray *paths = [bundle pathsForResourcesOfType:@&quot;cer&quot; inDirectory:@&quot;.&quot;];
+
+        NSMutableSet *certificates = [NSMutableSet setWithCapacity:[paths count]];
+        for (NSString *path in paths) {
+            NSData *certificateData = [NSData dataWithContentsOfFile:path];
+            [certificates addObject:certificateData];
+        }
+
+        return [NSSet setWithSet:certificates];
+    }
+</code></pre><h4 id="public_key__u83B7_u53D6"><a href="#public_key__u83B7_u53D6" class="headerlink" title="public key 获取"></a>public key 获取</h4><p>certificate中存放有public key、证书主体、数字签名等,所以public key就是从上面certificate文件中取出,主要用到的API是Security framework。</p>
+<h4 id="u6821_u9A8C_u5165_u53E3"><a href="#u6821_u9A8C_u5165_u53E3" class="headerlink" title="校验入口"></a>校验入口</h4><p>当收到NSURLSessionTaskDelegate的</p>
+<pre><code>- (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task
+                            didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge 
+                                completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition disposition, NSURLCredential * __nullable credential))completionHandler;
+</code></pre><p>接口时就需要客户端校验服务器发送的证书了，具体校验规则就3种，校验内容也在开头说过了，具体校验代码都是基于Security framework，这儿就不粘贴代码了，详细请看接口:</p>
+<pre><code>- (BOOL)evaluateServerTrust:(SecTrustRef)serverTrust
+                  forDomain:(NSString *)domain
 </code></pre></span>
       
     </div>
@@ -288,17 +297,13 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/07/29/AFNetworking3-1源码解读-二/" rel="next" title="AFNetworking3.1源码解读<二>">
-                <i class="fa fa-chevron-left"></i> AFNetworking3.1源码解读<二>
+              <a href="/2016/08/24/AFNetworking3-1源码解读<三>/" rel="next" title="AFNetworking3.1源码解读<三>">
+                <i class="fa fa-chevron-left"></i> AFNetworking3.1源码解读<三>
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/08/31/AFNetworking3-1源码解读-四/" rel="prev" title="AFNetworking3.1源码解读<四>">
-                AFNetworking3.1源码解读<四> <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -325,8 +330,8 @@
         
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2016/08/24/AFNetworking3-1源码解读<三>/"
-           data-title="AFNetworking3.1源码解读<三>" data-url="http://nerdfooprogrammer.github.io/2016/08/24/AFNetworking3-1源码解读<三>/">
+      <div class="ds-thread" data-thread-key="2016/08/31/AFNetworking3-1源码解读-四/"
+           data-title="AFNetworking3.1源码解读<四>" data-url="http://nerdfooprogrammer.github.io/2016/08/31/AFNetworking3-1源码解读-四/">
       </div>
     
   </div>
@@ -433,7 +438,7 @@
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#u6570_u636E_u5408_u6CD5_u6027_u68C0_u67E5"><span class="nav-number">1.</span> <span class="nav-text">数据合法性检查</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RawData_u89E3_u7801"><span class="nav-number">2.</span> <span class="nav-text">RawData解码</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Reachability"><span class="nav-number">1.</span> <span class="nav-text">Reachability</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#u76D1_u542C_u7F51_u7EDC"><span class="nav-number">1.0.1.</span> <span class="nav-text">监听网络</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#u7F51_u7EDC_u72B6_u6001_u83B7_u53D6"><span class="nav-number">1.0.2.</span> <span class="nav-text">网络状态获取</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#u505C_u6B62_u76D1_u542C_u7F51_u7EDC"><span class="nav-number">1.0.3.</span> <span class="nav-text">停止监听网络</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Security"><span class="nav-number">2.</span> <span class="nav-text">Security</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#certificate_u83B7_u53D6"><span class="nav-number">2.0.1.</span> <span class="nav-text">certificate获取</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#public_key__u83B7_u53D6"><span class="nav-number">2.0.2.</span> <span class="nav-text">public key 获取</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#u6821_u9A8C_u5165_u53E3"><span class="nav-number">2.0.3.</span> <span class="nav-text">校验入口</span></a></li></ol></li></ol></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator">
