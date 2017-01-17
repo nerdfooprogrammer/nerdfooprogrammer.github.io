@@ -53,16 +53,16 @@
 
 
 
-<meta name="description" content="上篇文章AFNewworking3.1源码解读&amp;lt;三&amp;gt;主要学习了Response Serialization相关部分，着篇主要来学习Reachability和Security。">
+<meta name="description" content="“下拉刷新”和“上拉加载更多”应该是App标配的功能了，而iOS SDK只提供了UIRefreshControl控件且只有“下拉刷新”功能且只能用于UITableViewController,所以当项目中没有用到UITableViewController或者需要定制“下拉刷新”和“上拉加载更多”时只能自己定制实现，好在这块有好多现成的开源库，国内这块做的比较好的是小码哥的MJRefresh,今天就">
 <meta property="og:type" content="article">
-<meta property="og:title" content="AFNetworking3.1源码解读<四>">
-<meta property="og:url" content="http://nerdfooprogrammer.github.io/2016/08/31/AFNetworking3-1源码解读-四/index.html">
+<meta property="og:title" content="MJRefresh源码阅读<一>">
+<meta property="og:url" content="http://nerdfooprogrammer.github.io/2016/12/10/MJRefresh源码阅读-一/index.html">
 <meta property="og:site_name" content="NerdFooProgrammer's blog">
-<meta property="og:description" content="上篇文章AFNewworking3.1源码解读&amp;lt;三&amp;gt;主要学习了Response Serialization相关部分，着篇主要来学习Reachability和Security。">
-<meta property="og:updated_time" content="2016-09-03T13:37:53.000Z">
+<meta property="og:description" content="“下拉刷新”和“上拉加载更多”应该是App标配的功能了，而iOS SDK只提供了UIRefreshControl控件且只有“下拉刷新”功能且只能用于UITableViewController,所以当项目中没有用到UITableViewController或者需要定制“下拉刷新”和“上拉加载更多”时只能自己定制实现，好在这块有好多现成的开源库，国内这块做的比较好的是小码哥的MJRefresh,今天就">
+<meta property="og:updated_time" content="2016-12-15T00:12:45.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="AFNetworking3.1源码解读<四>">
-<meta name="twitter:description" content="上篇文章AFNewworking3.1源码解读&amp;lt;三&amp;gt;主要学习了Response Serialization相关部分，着篇主要来学习Reachability和Security。">
+<meta name="twitter:title" content="MJRefresh源码阅读<一>">
+<meta name="twitter:description" content="“下拉刷新”和“上拉加载更多”应该是App标配的功能了，而iOS SDK只提供了UIRefreshControl控件且只有“下拉刷新”功能且只能用于UITableViewController,所以当项目中没有用到UITableViewController或者需要定制“下拉刷新”和“上拉加载更多”时只能自己定制实现，好在这块有好多现成的开源库，国内这块做的比较好的是小码哥的MJRefresh,今天就">
 
 
 
@@ -74,7 +74,7 @@
   };
 </script>
 
-  <title> AFNetworking3.1源码解读<四> | NerdFooProgrammer's blog </title>
+  <title> MJRefresh源码阅读<一> | NerdFooProgrammer's blog </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -204,7 +204,7 @@
             
             
               
-                AFNetworking3.1源码解读<四>
+                MJRefresh源码阅读<一>
               
             
           </h1>
@@ -213,8 +213,8 @@
         <div class="post-meta">
           <span class="post-time">
             发表于
-            <time itemprop="dateCreated" datetime="2016-08-31T07:20:02+08:00" content="2016-08-31">
-              2016-08-31
+            <time itemprop="dateCreated" datetime="2016-12-10T21:25:40+08:00" content="2016-12-10">
+              2016-12-10
             </time>
           </span>
 
@@ -224,8 +224,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/08/31/AFNetworking3-1源码解读-四/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/08/31/AFNetworking3-1源码解读-四/" itemprop="commentsCount"></span>
+                <a href="/2016/12/10/MJRefresh源码阅读-一/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/12/10/MJRefresh源码阅读-一/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -244,49 +244,53 @@
       
 
       
-        <span itemprop="articleBody"><p>上篇文章<a href="http://nerdfooprogrammer.github.io/2016/08/24/AFNetworking3-1源码解读%3C三%3E/">AFNewworking3.1源码解读&lt;三&gt;</a>主要学习了Response Serialization相关部分，着篇主要来学习Reachability和Security。</p>
-<a id="more"></a>
-<h2 id="Reachability"><a href="#Reachability" class="headerlink" title="Reachability"></a>Reachability</h2><h4 id="u76D1_u542C_u7F51_u7EDC"><a href="#u76D1_u542C_u7F51_u7EDC" class="headerlink" title="监听网络"></a>监听网络</h4><p>reachability主要是基于底层框架SCNetworkReachability实现的，在startMonitoring中设置了网络状态变化时的回调函数，以及最重要的把reachability添加到了MainRunLoop中的kCFRunLoopCommonModes，这样就实现了监听事件一直存活（添加入MainRunLoop,reability相当于一个source），并且当网络状态发生变化时及时响应(设置了事件回调)。相关代码如下:</p>
-<pre><code>//设置callback
-SCNetworkReachabilitySetCallback(self.networkReachability, AFNetworkReachabilityCallback, &amp;context);
+        <span itemprop="articleBody"><p>“下拉刷新”和“上拉加载更多”应该是App标配的功能了，而iOS SDK只提供了UIRefreshControl控件且只有“下拉刷新”功能且只能用于UITableViewController,所以当项目中没有用到UITableViewController或者需要定制“下拉刷新”和“上拉加载更多”时只能自己定制实现，好在这块有好多现成的开源库，国内这块做的比较好的是小码哥的MJRefresh,今天就纪录下学习完MJRefrsh源码后的心得。<br><a id="more"></a></p>
+<h2 id="u539F_u7406"><a href="#u539F_u7406" class="headerlink" title="原理"></a>原理</h2><p>总的来说就是给scrollview添加一个头视图(header)和尾视图(footer)，通过监听scrollview的contentOffset变化来动态改变header和footer的状态(KVO实现)，每种状态预先均已设置了一些监听事件(block实现)，处于指定状态时就执行事先设置的事件。</p>
+<p>header和footer的状态变化可以是根据scrollview的contentOffset来设置，也可以是刷新结束后主动设置。MJRefresh内部维护一个状态机，分别为MJRefreshStateIdle、MJRefreshStatePulling、MJRefreshStateRefreshing、MJRefreshStateWillRefresh、MJRefreshStateNoMoreData，具体处于哪种状态，默认是MJRefreshStateIdle状态。</p>
+<p>以头视图header为例，一开始header的y坐标设置为一个负数这样在默认状态时就看不到header了，然后当下拉srollview时就能看到header了，当下拉到一定位置时也就是说contentOffset达到某个阈值时header就变为刷新状态了，此时就需要设置contentInset了(因为scroolview设置了bounce功能，如果不设置contentInset则下拉松开时scrollview就会回弹到初始原点的位置了，header就看不到了，所以为了让header在刷新状态时停留在顶部就需要设置contentInset)让header停留在顶部，当刷新状态结束时再把contentInset设置为0(原始值)，然后header就看不到了，刷新结束。</p>
+<h2 id="Runtime"><a href="#Runtime" class="headerlink" title="Runtime"></a>Runtime</h2><h3 id="category_u589E_u52A0_u5C5E_u6027"><a href="#category_u589E_u52A0_u5C5E_u6027" class="headerlink" title="category增加属性"></a>category增加属性</h3><p>为了给UIScrollView增加header和footer属性，MJRefresh采用category实现，但category不能直接添加属性，但可以通过objc－runtime中objc_getAssociatedObject<br>和objc_setAssociatedObject方法实现，源码如下：</p>
+<pre><code>- (void)setMj_header:(MJRefreshHeader *)mj_header
+{
+    if (mj_header != self.mj_header) {
+        // 删除旧的，添加新的
+        [self.mj_header removeFromSuperview];
+        [self insertSubview:mj_header atIndex:0];
 
-//添加入RunLoop   SCNetworkReachabilityScheduleWithRunLoop(self.networkReachability, CFRunLoopGetMain(), kCFRunLoopCommonModes);
-</code></pre><h4 id="u7F51_u7EDC_u72B6_u6001_u83B7_u53D6"><a href="#u7F51_u7EDC_u72B6_u6001_u83B7_u53D6" class="headerlink" title="网络状态获取"></a>网络状态获取</h4><ol>
-<li>直接获取reachable(有网)、reachableViaWWAN(移动网络)、reachableViaWiFi(Wi-Fi网络)属性。</li>
-<li>监听<code>AFNetworkingReachabilityDidChangeNotification</code>通知，ReachabilityManager会在网路状态发生变化时主动发送通知。</li>
-<li>设置网络状态发生变化时的block，setReachabilityStatusChangeBlock:在网络发生变化时也会回调。</li>
-<li>KVO reachable、reachableViaWWAN、reachableViaWiFi,当网络网络状态变化时Reability会主动更新这些属性值，所以如果KVO了这些属性就能实时获取到网络状态了。这三个属性的值都依赖网路状态属性，所以AFNetworkReachabilityManager实现了keyPathsForValuesAffectingValueForKey方法，相关代码如下:</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">+  (NSSet *)keyPathsForValuesAffectingValueForKey:(NSString *)key &#123;&#10;  if ([key isEqualToString:@&#34;reachable&#34;] || [key isEqualToString:@&#34;reachableViaWWAN&#34;] || [key isEqualToString:@&#34;reachableViaWiFi&#34;]) &#123;&#10;      return [NSSet setWithObject:@&#34;networkReachabilityStatus&#34;];&#10;  &#125;&#10;  return [super keyPathsForValuesAffectingValueForKey:key];&#10;  &#125;</span><br></pre></td></tr></table></figure>
-<h4 id="u505C_u6B62_u76D1_u542C_u7F51_u7EDC"><a href="#u505C_u6B62_u76D1_u542C_u7F51_u7EDC" class="headerlink" title="停止监听网络"></a>停止监听网络</h4><p>停止监听网络非常简单，只需把reability事件从MainRunloop中删除即可，相关代码如下:</p>
-<pre><code>- (void)stopMonitoring {
-    if (!self.networkReachability) {
-        return;
+        // 存储新的
+        [self willChangeValueForKey:@&quot;mj_header&quot;]; // KVO
+        objc_setAssociatedObject(self, &amp;MJRefreshHeaderKey,
+                                 mj_header, OBJC_ASSOCIATION_ASSIGN);
+        [self didChangeValueForKey:@&quot;mj_header&quot;]; // KVO
     }
-SCNetworkReachabilityUnscheduleFromRunLoop(self.networkReachability, CFRunLoopGetMain(), kCFRunLoopCommonModes);
 }
-</code></pre><h2 id="Security"><a href="#Security" class="headerlink" title="Security"></a>Security</h2><p>AFNetworking支持3种Security policy，分别为AFSSLPinningModeNone、AFSSLPinningModePublicKey、AFSSLPinningModeCertificate。当Security policy为AFSSLPinningModeNone时只校验服务器发送的证书是否合法；当Security policy为AFSSLPinningModePublicKey时则通过校验本地certificate中public key和服务器发送的certificate中public key来验证合法性；当Security policy为AFSSLPinningModeCertificate时校验本地certificate和服务器发送的certificate来验证合法性。</p>
-<h4 id="certificate_u83B7_u53D6"><a href="#certificate_u83B7_u53D6" class="headerlink" title="certificate获取"></a>certificate获取</h4><p>AFNetworking会默认获取编译工程中.cer文件，而.cer就是certificate，pinnedCertificates属性中存放着这些.cer文件内容。相关代码如下:</p>
-<pre><code>+ (NSSet *)certificatesInBundle:(NSBundle *)bundle {
-    NSArray *paths = [bundle pathsForResourcesOfType:@&quot;cer&quot; inDirectory:@&quot;.&quot;];
 
-        NSMutableSet *certificates = [NSMutableSet setWithCapacity:[paths count]];
-        for (NSString *path in paths) {
-            NSData *certificateData = [NSData dataWithContentsOfFile:path];
-            [certificates addObject:certificateData];
-        }
+- (MJRefreshHeader *)mj_header
+{
+    return objc_getAssociatedObject(self, &amp;MJRefreshHeaderKey);
+}
+</code></pre><h3 id="method_swizzling"><a href="#method_swizzling" class="headerlink" title="method swizzling"></a>method swizzling</h3><p>为了方便地在调用UITableView reloadData后执行指定事件，MJRefresh重写了UITableView和UICollectionView的load方法，在load方法中exchange了reloadData和自定义方法，具体技术用的是objc－runtime的method_exchangeImplementations方法。</p>
+<pre><code>+ (void)exchangeInstanceMethod1:(SEL)method1 method2:(SEL)method2
+{
+    method_exchangeImplementations(class_getInstanceMethod(self, method1), class_getInstanceMethod(self, method2));
+}
 
-        return [NSSet setWithSet:certificates];
-    }
-</code></pre><h4 id="public_key__u83B7_u53D6"><a href="#public_key__u83B7_u53D6" class="headerlink" title="public key 获取"></a>public key 获取</h4><p>certificate中存放有public key、证书主体、数字签名等,所以public key就是从上面certificate文件中取出,主要用到的API是Security framework。</p>
-<h4 id="u6821_u9A8C_u5165_u53E3"><a href="#u6821_u9A8C_u5165_u53E3" class="headerlink" title="校验入口"></a>校验入口</h4><p>当收到NSURLSessionTaskDelegate的</p>
-<pre><code>- (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task
-                            didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge 
-                                completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition disposition, NSURLCredential * __nullable credential))completionHandler;
-</code></pre><p>接口时就需要客户端校验服务器发送的证书了，具体校验规则就3种，校验内容也在开头说过了，具体校验代码都是基于Security framework，这儿就不粘贴代码了，详细请看接口:</p>
-<pre><code>- (BOOL)evaluateServerTrust:(SecTrustRef)serverTrust
-                  forDomain:(NSString *)domain
-</code></pre></span>
++ (void)load
+{
+    [self exchangeInstanceMethod1:@selector(reloadData) method2:@selector(mj_reloadData)];
+}
+
+- (void)mj_reloadData
+{
+    [self mj_reloadData];
+
+    [self executeReloadDataBlock];
+}
+</code></pre><h2 id="u4E0B_u62C9_u5237_u65B0_u5177_u4F53_u5B9E_u73B0_u7EC6_u8282"><a href="#u4E0B_u62C9_u5237_u65B0_u5177_u4F53_u5B9E_u73B0_u7EC6_u8282" class="headerlink" title="下拉刷新具体实现细节"></a>下拉刷新具体实现细节</h2><ol>
+<li>重写willMoveToSuperview方法。当header将要添加到目标view时，会调用该方法，在该方法中设置header的宽度、x坐标、最开始的contentInset、设置永远支持垂直弹簧效果及最重要的KVO scrollView的contentOffset、contentInset和panGestureRecognizer属性。</li>
+<li>重写layoutSubviews方法。当header添加到目标view后会调用该方法，在该方法中设置header的y坐标为负的自身高度(高度是在初始话时设置的)，这样header在初始状态时看不到，至此整个header的初始化工作就已完成，剩下的就是监听scrollview的属性改变自身状态。</li>
+<li></li>
+</ol>
+<h2 id="u81EA_u52A8_u4E0A_u62C9_u52A0_u8F7D_u5177_u4F53_u5B9E_u73B0_u7EC6_u8282"><a href="#u81EA_u52A8_u4E0A_u62C9_u52A0_u8F7D_u5177_u4F53_u5B9E_u73B0_u7EC6_u8282" class="headerlink" title="自动上拉加载具体实现细节"></a>自动上拉加载具体实现细节</h2></span>
       
     </div>
 
@@ -297,16 +301,16 @@ SCNetworkReachabilityUnscheduleFromRunLoop(self.networkReachability, CFRunLoopGe
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/08/24/AFNetworking3-1源码解读<三>/" rel="next" title="AFNetworking3.1源码解读<三>">
-                <i class="fa fa-chevron-left"></i> AFNetworking3.1源码解读<三>
+              <a href="/2016/08/31/AFNetworking3-1源码解读-四/" rel="next" title="AFNetworking3.1源码解读<四>">
+                <i class="fa fa-chevron-left"></i> AFNetworking3.1源码解读<四>
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2016/12/10/MJRefresh源码阅读-一/" rel="prev" title="MJRefresh源码阅读<一>">
-                MJRefresh源码阅读<一> <i class="fa fa-chevron-right"></i>
+              <a href="/2017/01/16/SDWebImage源码解读/" rel="prev" title="SDWebImage源码解读">
+                SDWebImage源码解读 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -334,8 +338,8 @@ SCNetworkReachabilityUnscheduleFromRunLoop(self.networkReachability, CFRunLoopGe
         
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2016/08/31/AFNetworking3-1源码解读-四/"
-           data-title="AFNetworking3.1源码解读<四>" data-url="http://nerdfooprogrammer.github.io/2016/08/31/AFNetworking3-1源码解读-四/">
+      <div class="ds-thread" data-thread-key="2016/12/10/MJRefresh源码阅读-一/"
+           data-title="MJRefresh源码阅读<一>" data-url="http://nerdfooprogrammer.github.io/2016/12/10/MJRefresh源码阅读-一/">
       </div>
     
   </div>
@@ -442,7 +446,7 @@ SCNetworkReachabilityUnscheduleFromRunLoop(self.networkReachability, CFRunLoopGe
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Reachability"><span class="nav-number">1.</span> <span class="nav-text">Reachability</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#u76D1_u542C_u7F51_u7EDC"><span class="nav-number">1.0.1.</span> <span class="nav-text">监听网络</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#u7F51_u7EDC_u72B6_u6001_u83B7_u53D6"><span class="nav-number">1.0.2.</span> <span class="nav-text">网络状态获取</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#u505C_u6B62_u76D1_u542C_u7F51_u7EDC"><span class="nav-number">1.0.3.</span> <span class="nav-text">停止监听网络</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Security"><span class="nav-number">2.</span> <span class="nav-text">Security</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#certificate_u83B7_u53D6"><span class="nav-number">2.0.1.</span> <span class="nav-text">certificate获取</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#public_key__u83B7_u53D6"><span class="nav-number">2.0.2.</span> <span class="nav-text">public key 获取</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#u6821_u9A8C_u5165_u53E3"><span class="nav-number">2.0.3.</span> <span class="nav-text">校验入口</span></a></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#u539F_u7406"><span class="nav-number">1.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Runtime"><span class="nav-number">2.</span> <span class="nav-text">Runtime</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#category_u589E_u52A0_u5C5E_u6027"><span class="nav-number">2.1.</span> <span class="nav-text">category增加属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#method_swizzling"><span class="nav-number">2.2.</span> <span class="nav-text">method swizzling</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#u4E0B_u62C9_u5237_u65B0_u5177_u4F53_u5B9E_u73B0_u7EC6_u8282"><span class="nav-number">3.</span> <span class="nav-text">下拉刷新具体实现细节</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#u81EA_u52A8_u4E0A_u62C9_u52A0_u8F7D_u5177_u4F53_u5B9E_u73B0_u7EC6_u8282"><span class="nav-number">4.</span> <span class="nav-text">自动上拉加载具体实现细节</span></a></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator">
