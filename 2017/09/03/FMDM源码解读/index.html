@@ -53,16 +53,16 @@
 
 
 
-<meta name="description" content="上篇文章AFNewworking3.1源码解读&amp;lt;三&amp;gt;主要学习了Response Serialization相关部分，着篇主要来学习Reachability和Security。">
+<meta name="description" content="iOS App开发中数据持久层一般用的是FMDB，FMDB是对SQLite的一层Wrapper,封装了比较难懂的C接口，提供了面向Objective-C的接口方法，对iOS开发者很友好。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="AFNetworking3.1源码解读<四>">
-<meta property="og:url" content="http://nerdfooprogrammer.github.io/2016/08/31/AFNetworking3-1源码解读-四/index.html">
+<meta property="og:title" content="FMDM源码解读">
+<meta property="og:url" content="http://nerdfooprogrammer.github.io/2017/09/03/FMDM源码解读/index.html">
 <meta property="og:site_name" content="NerdFooProgrammer's blog">
-<meta property="og:description" content="上篇文章AFNewworking3.1源码解读&amp;lt;三&amp;gt;主要学习了Response Serialization相关部分，着篇主要来学习Reachability和Security。">
-<meta property="og:updated_time" content="2016-09-03T13:37:53.000Z">
+<meta property="og:description" content="iOS App开发中数据持久层一般用的是FMDB，FMDB是对SQLite的一层Wrapper,封装了比较难懂的C接口，提供了面向Objective-C的接口方法，对iOS开发者很友好。">
+<meta property="og:updated_time" content="2017-09-03T16:34:45.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="AFNetworking3.1源码解读<四>">
-<meta name="twitter:description" content="上篇文章AFNewworking3.1源码解读&amp;lt;三&amp;gt;主要学习了Response Serialization相关部分，着篇主要来学习Reachability和Security。">
+<meta name="twitter:title" content="FMDM源码解读">
+<meta name="twitter:description" content="iOS App开发中数据持久层一般用的是FMDB，FMDB是对SQLite的一层Wrapper,封装了比较难懂的C接口，提供了面向Objective-C的接口方法，对iOS开发者很友好。">
 
 
 
@@ -74,7 +74,7 @@
   };
 </script>
 
-  <title> AFNetworking3.1源码解读<四> | NerdFooProgrammer's blog </title>
+  <title> FMDM源码解读 | NerdFooProgrammer's blog </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -204,7 +204,7 @@
             
             
               
-                AFNetworking3.1源码解读<四>
+                FMDM源码解读
               
             
           </h1>
@@ -213,8 +213,8 @@
         <div class="post-meta">
           <span class="post-time">
             发表于
-            <time itemprop="dateCreated" datetime="2016-08-31T07:20:02+08:00" content="2016-08-31">
-              2016-08-31
+            <time itemprop="dateCreated" datetime="2017-09-03T22:23:05+08:00" content="2017-09-03">
+              2017-09-03
             </time>
           </span>
 
@@ -224,8 +224,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/08/31/AFNetworking3-1源码解读-四/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/08/31/AFNetworking3-1源码解读-四/" itemprop="commentsCount"></span>
+                <a href="/2017/09/03/FMDM源码解读/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/09/03/FMDM源码解读/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -244,49 +244,63 @@
       
 
       
-        <span itemprop="articleBody"><p>上篇文章<a href="http://nerdfooprogrammer.github.io/2016/08/24/AFNetworking3-1源码解读%3C三%3E/">AFNewworking3.1源码解读&lt;三&gt;</a>主要学习了Response Serialization相关部分，着篇主要来学习Reachability和Security。</p>
+        <span itemprop="articleBody"><p>iOS App开发中数据持久层一般用的是FMDB，FMDB是对SQLite的一层Wrapper,封装了比较难懂的C接口，提供了面向Objective-C的接口方法，对iOS开发者很友好。</p>
 <a id="more"></a>
-<h2 id="Reachability"><a href="#Reachability" class="headerlink" title="Reachability"></a>Reachability</h2><h4 id="u76D1_u542C_u7F51_u7EDC"><a href="#u76D1_u542C_u7F51_u7EDC" class="headerlink" title="监听网络"></a>监听网络</h4><p>reachability主要是基于底层框架SCNetworkReachability实现的，在startMonitoring中设置了网络状态变化时的回调函数，以及最重要的把reachability添加到了MainRunLoop中的kCFRunLoopCommonModes，这样就实现了监听事件一直存活（添加入MainRunLoop,reability相当于一个source），并且当网络状态发生变化时及时响应(设置了事件回调)。相关代码如下:</p>
-<pre><code>//设置callback
-SCNetworkReachabilitySetCallback(self.networkReachability, AFNetworkReachabilityCallback, &amp;context);
-
-//添加入RunLoop   SCNetworkReachabilityScheduleWithRunLoop(self.networkReachability, CFRunLoopGetMain(), kCFRunLoopCommonModes);
-</code></pre><h4 id="u7F51_u7EDC_u72B6_u6001_u83B7_u53D6"><a href="#u7F51_u7EDC_u72B6_u6001_u83B7_u53D6" class="headerlink" title="网络状态获取"></a>网络状态获取</h4><ol>
-<li>直接获取reachable(有网)、reachableViaWWAN(移动网络)、reachableViaWiFi(Wi-Fi网络)属性。</li>
-<li>监听<code>AFNetworkingReachabilityDidChangeNotification</code>通知，ReachabilityManager会在网路状态发生变化时主动发送通知。</li>
-<li>设置网络状态发生变化时的block，setReachabilityStatusChangeBlock:在网络发生变化时也会回调。</li>
-<li>KVO reachable、reachableViaWWAN、reachableViaWiFi,当网络网络状态变化时Reability会主动更新这些属性值，所以如果KVO了这些属性就能实时获取到网络状态了。这三个属性的值都依赖网路状态属性，所以AFNetworkReachabilityManager实现了keyPathsForValuesAffectingValueForKey方法，相关代码如下:</li>
+<p>正如FMDB源码注释中所说的那样FMDB主要有3个类：</p>
+<ul>
+<li><p>FMDatabase </p>
+<p>SQLite数据库，用于执行SQL语句。</p>
+</li>
+<li><p>FMResultSet</p>
+<p>在FMDatabase对象上执行查询语句得到的结果集</p>
+</li>
+<li><p>FMDatabaseQueue</p>
+<p>用于多线程数据库在的查询、更新</p>
+</li>
+</ul>
+<h2 id="FMDatabase"><a href="#FMDatabase" class="headerlink" title="FMDatabase"></a>FMDatabase</h2><p>FMDatabase描述的是SQLite数据库，它负责管理数据库的创建、打开、关闭、事物、CRUD语句执行。</p>
+<h3 id="u521B_u5EFA_u6570_u636E_u5E93"><a href="#u521B_u5EFA_u6570_u636E_u5E93" class="headerlink" title="创建数据库"></a>创建数据库</h3><p>创建数据库时只需指定数据库文件路径即可，具体路径可为以下3种之一：</p>
+<ol>
+<li>文件系统路径，这个文件可以不存在，如果文件不存在就创建。</li>
+<li>一个空字符串<code>@“”</code>，此时会在临时目录下创建一个空数据库，这个数据库会在数据库链接关闭时删除。</li>
+<li><code>nil</code>，会创建一个内存数据库，这个数据库会在数据库链接关闭时销毁。</li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">+  (NSSet *)keyPathsForValuesAffectingValueForKey:(NSString *)key &#123;&#10;  if ([key isEqualToString:@&#34;reachable&#34;] || [key isEqualToString:@&#34;reachableViaWWAN&#34;] || [key isEqualToString:@&#34;reachableViaWiFi&#34;]) &#123;&#10;      return [NSSet setWithObject:@&#34;networkReachabilityStatus&#34;];&#10;  &#125;&#10;  return [super keyPathsForValuesAffectingValueForKey:key];&#10;  &#125;</span><br></pre></td></tr></table></figure>
-<h4 id="u505C_u6B62_u76D1_u542C_u7F51_u7EDC"><a href="#u505C_u6B62_u76D1_u542C_u7F51_u7EDC" class="headerlink" title="停止监听网络"></a>停止监听网络</h4><p>停止监听网络非常简单，只需把reability事件从MainRunloop中删除即可，相关代码如下:</p>
-<pre><code>- (void)stopMonitoring {
-    if (!self.networkReachability) {
-        return;
-    }
-SCNetworkReachabilityUnscheduleFromRunLoop(self.networkReachability, CFRunLoopGetMain(), kCFRunLoopCommonModes);
-}
-</code></pre><h2 id="Security"><a href="#Security" class="headerlink" title="Security"></a>Security</h2><p>AFNetworking支持3种Security policy，分别为AFSSLPinningModeNone、AFSSLPinningModePublicKey、AFSSLPinningModeCertificate。当Security policy为AFSSLPinningModeNone时只校验服务器发送的证书是否合法；当Security policy为AFSSLPinningModePublicKey时则通过校验本地certificate中public key和服务器发送的certificate中public key来验证合法性；当Security policy为AFSSLPinningModeCertificate时校验本地certificate和服务器发送的certificate来验证合法性。</p>
-<h4 id="certificate_u83B7_u53D6"><a href="#certificate_u83B7_u53D6" class="headerlink" title="certificate获取"></a>certificate获取</h4><p>AFNetworking会默认获取编译工程中.cer文件，而.cer就是certificate，pinnedCertificates属性中存放着这些.cer文件内容。相关代码如下:</p>
-<pre><code>+ (NSSet *)certificatesInBundle:(NSBundle *)bundle {
-    NSArray *paths = [bundle pathsForResourcesOfType:@&quot;cer&quot; inDirectory:@&quot;.&quot;];
-
-        NSMutableSet *certificates = [NSMutableSet setWithCapacity:[paths count]];
-        for (NSString *path in paths) {
-            NSData *certificateData = [NSData dataWithContentsOfFile:path];
-            [certificates addObject:certificateData];
-        }
-
-        return [NSSet setWithSet:certificates];
-    }
-</code></pre><h4 id="public_key__u83B7_u53D6"><a href="#public_key__u83B7_u53D6" class="headerlink" title="public key 获取"></a>public key 获取</h4><p>certificate中存放有public key、证书主体、数字签名等,所以public key就是从上面certificate文件中取出,主要用到的API是Security framework。</p>
-<h4 id="u6821_u9A8C_u5165_u53E3"><a href="#u6821_u9A8C_u5165_u53E3" class="headerlink" title="校验入口"></a>校验入口</h4><p>当收到NSURLSessionTaskDelegate的</p>
-<pre><code>- (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task
-                            didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge 
-                                completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition disposition, NSURLCredential * __nullable credential))completionHandler;
-</code></pre><p>接口时就需要客户端校验服务器发送的证书了，具体校验规则就3种，校验内容也在开头说过了，具体校验代码都是基于Security framework，这儿就不粘贴代码了，详细请看接口:</p>
-<pre><code>- (BOOL)evaluateServerTrust:(SecTrustRef)serverTrust
-                  forDomain:(NSString *)domain
-</code></pre></span>
+<p>FMDatabase提供了2个方法供使用者创建数据库，一个是类方法，另一个是实例方法，类方法最终调用的也是实例方法，默认初始化方法中主要初始化了数据库路径、查询结果集合、最大忙重试时间。</p>
+<h3 id="u6253_u5F00_u6570_u636E_u5E93"><a href="#u6253_u5F00_u6570_u636E_u5E93" class="headerlink" title="打开数据库"></a>打开数据库</h3><p>FMDB提供了3个打开数据库的方法，其中<code>open</code>方法调用的是<code>sqlite3_open()</code>函数，<code>-(BOOL)openWithFlags:(int)flags</code>、<code>(BOOL)openWithFlags:(int)flags vfs:(NSString *)vfsName</code>调用的是<code>sqlite3_open_v2</code>函数，其中<code>sqlite3_open_v2</code>函数可设置打开模式及虚拟文件系统名称，其中打开模式有<code>SQLITE_OPEN_READONLY</code>、<code>SQLITE_OPEN_READWRITE</code>、<code>SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE</code>，数据库打开后设置忙重试回调sqlite3_busy_handler，回调方法如果返回0就不在重试。</p>
+<h3 id="CRUD"><a href="#CRUD" class="headerlink" title="CRUD"></a>CRUD</h3><p>在FMDB中把CRUD分为了2种操作：更新（没有结果返回，比如UPDATE、INSERT、DELETE）、查询（有结果返回，比如QUERY）</p>
+<ul>
+<li>更新操作</li>
+</ul>
+<p>FMDB中所有的更新方法最终调用的都是<code>(BOOL)executeUpdate:(NSString*)sql error:(NSError**)outErr withArgumentsInArray:(NSArray*)arrayArgs orDictionary:(NSDictionary *)dictionaryArgs orVAList:(va_list)args</code>方法，该方法调用了SQLite的3个C接口API，分别为：</p>
+<ol>
+<li><p><code>sqlite3_prepare_v2</code></p>
+<p>为了方便SQLite处理SQL语句，需要先把字符串预处理成sqlite3_stmt</p>
+</li>
+<li><p><code>sqlite3_bind</code></p>
+<p>把参数绑定到SQLite中?预置符位置</p>
+</li>
+<li><p><code>sqlite_step</code></p>
+<p>执行SQLite更新语句</p>
+</li>
+</ol>
+<p>在执行更新语句中为了提高效率（sqlite3_prepare_v2很耗时），增加了sqlite3_stmt预处理语句缓存机制，如果使能了<code>_shouldCacheStatements</code>属性，那么经过预处理的SQL语句会被缓存起来，等下次再使用同样的SQL语句时执行从缓存中获取，获取到后调用<code>sqlite3_reset</code>函数就可以继续绑定新的参数。</p>
+<p>绑定参数主要是根据参数的数据类型调用相关的bind函数，如何判断参数是何种类型？根据<code>objCType</code>方法返回的类型字符串判断，例如：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">if (strcmp([obj objCType], @encode(int)) == 0) &#123;&#10;            sqlite3_bind_int(pStmt, idx, [obj intValue]);&#10; &#125;</span><br></pre></td></tr></table></figure>
+<p>如果参数是NSData类型，那么调用<code>sqlite3_bind_blob</code>，如果是int类型，调用<code>sqlite3_bind_int</code>,FMDB中除了<code>NSString</code>, <code>NSNumber</code>, <code>NSNull</code>, <code>NSDate</code>, 和 <code>NSData</code>之外其它对象类型均被认为是text类型，调用对象的<code>description</code>方法，具体参考源码中<code>(void)bindObject:(id)obj toColumn:(int)idx inStatement:(sqlite3_stmt*)pStmt</code>方法。</p>
+<ul>
+<li>查询操作</li>
+</ul>
+<p>查询操作与上述更新操作有部分类似，也会调用<code>sqlite3_prepare_v2</code>和<code>sqlite3_bind</code>接口，但是查询操作不会立即执行<code>sqlite_step</code>，只有在<code>FMResultSet</code>上调用<code>next</code>方法时才会执行，查询操作会返回<code>FMResultSet</code>对象。</p>
+<h2 id="u5173_u95ED_u6570_u636E_u5E93"><a href="#u5173_u95ED_u6570_u636E_u5E93" class="headerlink" title="关闭数据库"></a>关闭数据库</h2><p>关闭数据库主要是释放申请的相关资源，包括清空缓存语句、关闭查询结果、关闭数据库(用的是<code>sqlite3_close</code>)。</p>
+<h3 id="u4E8B_u7269"><a href="#u4E8B_u7269" class="headerlink" title="事物"></a>事物</h3><p>当想要原子操作数据库时可使用事物，FMDB提供了立即执行和延迟执行的事物，SQL语句分别为<strong>begin exclusive transaction</strong>和<strong>begin deferred transaction</strong>，当想要提交事物时执行<strong>commit transaction</strong>语句，当想要回滚时执行<strong>rollback transaction</strong>语句，上述代码逻辑具体参考源码中以下方法:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- (BOOL)beginTransaction;&#10;- (BOOL)beginDeferredTransaction;&#10;- (BOOL)commit;&#10;- (BOOL)rollback;</span><br></pre></td></tr></table></figure>
+<h2 id="FMResultSet"><a href="#FMResultSet" class="headerlink" title="FMResultSet"></a>FMResultSet</h2><p>FMResultSet是查询结果集，对外主要提供了2大类查询方法，一类是根据列索引查(xxxForColumnIndex，xxx表示的是具体类型），另一类是根据列名称查询（xxxForColumn，xxx表示的是具体类型）。实际上根据列名称查询方法最终调用的是根据列索引查询的方法，大概的实现逻辑为：FMResultSet内部维护了一个<strong>列名到列索引的映射表</strong>，当调用列名称时先通过列名到列索引的映射表查到相应的列索引号，然后调用列索引查询方法（列索引方法调用的是<code>sqlite3_column_xx</code>），那列名到列索引的映射表是怎么构造的呢？先根据<code>sqlite3_column_count</code>获取到列数，然后遍历每一列，再根据<code>sqlite3_column_name</code>获取列名即可完成映射，具体代码如下:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- (NSMutableDictionary *)columnNameToIndexMap &#123;&#10;    if (!_columnNameToIndexMap) &#123;&#10;        int columnCount = sqlite3_column_count([_statement statement]);&#10;        _columnNameToIndexMap = [[NSMutableDictionary alloc] initWithCapacity:(NSUInteger)columnCount];&#10;        int columnIdx = 0;&#10;        for (columnIdx = 0; columnIdx &#60; columnCount; columnIdx++) &#123;&#10;            [_columnNameToIndexMap setObject:[NSNumber numberWithInt:columnIdx]&#10;                                      forKey:[[NSString stringWithUTF8String:sqlite3_column_name([_statement statement], columnIdx)] lowercaseString]];&#10;        &#125;&#10;    &#125;&#10;    return _columnNameToIndexMap;&#10;&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="FMDatabaseQueue"><a href="#FMDatabaseQueue" class="headerlink" title="FMDatabaseQueue"></a>FMDatabaseQueue</h2><p>FMDatabase源码中写的很清楚，在多线程中用一个<code>&lt;FMDatabase&gt;</code>实例是坏想法，<code>&lt;FMDatabase&gt;</code>不是线程安全的，想要在多线程上操作数据库就用<code>FMDatabaseQueue</code>,<code>FMDatabaseQueue</code>会在内部的一个串行对列上执行blocks代码块，因此即便你在同一时间多个线程上调用<code>FMDatabaseQueue</code>方法，这些查询和更新操作也不会混乱，它们会根据顺讯依次执行。</p>
+<p>FMDatabaseQueue主要功能就是提供了一个内部串行对列，确保了多线程安全，具体的数据库操作逻辑还是用的FMDatabase，FMDatabaseQueue在执行blocks时是同步执行的，所以有可能引发死锁，为了解决死锁FMDatabase在创建内部对列时通过<code>dispatch_queue_set_specific(_queue, kDispatchQueueSpecificKey, (__bridge void *)self, NULL);</code>方法设置了一个context，当在执行block时先判断当前Queue的context，如果和之前设置的context相等则发生死锁，通过<code>assert</code>提示使用者发生死锁，例如如下代码就会发生死锁：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">FMDatabaseQueue *queue = [FMDatabaseQueue databaseQueueWithPath:[NSTemporaryDirectory() stringByAppendingString:@&#34;temp.db&#34;]];&#10;    [queue inDatabase:^(FMDatabase *db) &#123;&#10;        NSLog(@&#34;in queue&#34;);&#10;      //&#22312;&#21516;&#19968;&#20010;&#20018;&#34892;&#23545;&#21015;&#20013;&#21516;&#27493;&#25191;&#34892;&#65292;&#25925;&#32780;&#21457;&#29983;&#27515;&#38145;&#10;        [queue inDatabase:^(FMDatabase *db) &#123;&#10;            NSLog(@&#34;in nested queue&#34;);&#10;        &#125;];&#10;    &#125;]</span><br></pre></td></tr></table></figure>
+<p>切记不要在FMDatabase的block中嵌套调用。</p>
+</span>
       
     </div>
 
@@ -297,17 +311,13 @@ SCNetworkReachabilityUnscheduleFromRunLoop(self.networkReachability, CFRunLoopGe
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/08/24/AFNetworking3-1源码解读<三>/" rel="next" title="AFNetworking3.1源码解读<三>">
-                <i class="fa fa-chevron-left"></i> AFNetworking3.1源码解读<三>
+              <a href="/2017/08/20/JSONModel源码解读/" rel="next" title="JSONModel源码解读">
+                <i class="fa fa-chevron-left"></i> JSONModel源码解读
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/12/10/MJRefresh源码阅读-一/" rel="prev" title="MJRefresh源码阅读<一>">
-                MJRefresh源码阅读<一> <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -334,8 +344,8 @@ SCNetworkReachabilityUnscheduleFromRunLoop(self.networkReachability, CFRunLoopGe
         
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2016/08/31/AFNetworking3-1源码解读-四/"
-           data-title="AFNetworking3.1源码解读<四>" data-url="http://nerdfooprogrammer.github.io/2016/08/31/AFNetworking3-1源码解读-四/">
+      <div class="ds-thread" data-thread-key="2017/09/03/FMDM源码解读/"
+           data-title="FMDM源码解读" data-url="http://nerdfooprogrammer.github.io/2017/09/03/FMDM源码解读/">
       </div>
     
   </div>
@@ -442,7 +452,7 @@ SCNetworkReachabilityUnscheduleFromRunLoop(self.networkReachability, CFRunLoopGe
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Reachability"><span class="nav-number">1.</span> <span class="nav-text">Reachability</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#u76D1_u542C_u7F51_u7EDC"><span class="nav-number">1.0.1.</span> <span class="nav-text">监听网络</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#u7F51_u7EDC_u72B6_u6001_u83B7_u53D6"><span class="nav-number">1.0.2.</span> <span class="nav-text">网络状态获取</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#u505C_u6B62_u76D1_u542C_u7F51_u7EDC"><span class="nav-number">1.0.3.</span> <span class="nav-text">停止监听网络</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Security"><span class="nav-number">2.</span> <span class="nav-text">Security</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#certificate_u83B7_u53D6"><span class="nav-number">2.0.1.</span> <span class="nav-text">certificate获取</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#public_key__u83B7_u53D6"><span class="nav-number">2.0.2.</span> <span class="nav-text">public key 获取</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#u6821_u9A8C_u5165_u53E3"><span class="nav-number">2.0.3.</span> <span class="nav-text">校验入口</span></a></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#FMDatabase"><span class="nav-number">1.</span> <span class="nav-text">FMDatabase</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#u521B_u5EFA_u6570_u636E_u5E93"><span class="nav-number">1.1.</span> <span class="nav-text">创建数据库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u6253_u5F00_u6570_u636E_u5E93"><span class="nav-number">1.2.</span> <span class="nav-text">打开数据库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CRUD"><span class="nav-number">1.3.</span> <span class="nav-text">CRUD</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#u5173_u95ED_u6570_u636E_u5E93"><span class="nav-number">2.</span> <span class="nav-text">关闭数据库</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#u4E8B_u7269"><span class="nav-number">2.1.</span> <span class="nav-text">事物</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FMResultSet"><span class="nav-number">3.</span> <span class="nav-text">FMResultSet</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FMDatabaseQueue"><span class="nav-number">4.</span> <span class="nav-text">FMDatabaseQueue</span></a></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator">
