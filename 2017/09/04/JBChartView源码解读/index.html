@@ -53,16 +53,16 @@
 
 
 
-<meta name="description" content="上篇文章AFNetworking3.1源码解读&amp;lt;二&amp;gt;主要学习了Request Serialization相关部分，本篇主要学习Response Serialization，AFNetworking中一共实现了6种学习Response Serialization，分别为：AFURLResponseSerialization、AFJSONResponseSerializer、AFXMLPa">
+<meta name="description" content="JBChartView是一款iOS图表库，包含折线图和直方图。使用方便且可定制高。JBChartView所有的实现都类似UITableView的数据源和委托模式，所以说如果你对UITableView或者UITabelViewController的使用比较熟悉，使用JBChartView将会轻而易举。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="AFNetworking3.1源码解读<三>">
-<meta property="og:url" content="http://nerdfooprogrammer.github.io/2016/08/24/AFNetworking3-1源码解读<三>/index.html">
+<meta property="og:title" content="JBChartView源码解读">
+<meta property="og:url" content="http://nerdfooprogrammer.github.io/2017/09/04/JBChartView源码解读/index.html">
 <meta property="og:site_name" content="NerdFooProgrammer's blog">
-<meta property="og:description" content="上篇文章AFNetworking3.1源码解读&amp;lt;二&amp;gt;主要学习了Request Serialization相关部分，本篇主要学习Response Serialization，AFNetworking中一共实现了6种学习Response Serialization，分别为：AFURLResponseSerialization、AFJSONResponseSerializer、AFXMLPa">
-<meta property="og:updated_time" content="2016-08-25T15:06:55.000Z">
+<meta property="og:description" content="JBChartView是一款iOS图表库，包含折线图和直方图。使用方便且可定制高。JBChartView所有的实现都类似UITableView的数据源和委托模式，所以说如果你对UITableView或者UITabelViewController的使用比较熟悉，使用JBChartView将会轻而易举。">
+<meta property="og:updated_time" content="2017-09-05T15:26:39.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="AFNetworking3.1源码解读<三>">
-<meta name="twitter:description" content="上篇文章AFNetworking3.1源码解读&amp;lt;二&amp;gt;主要学习了Request Serialization相关部分，本篇主要学习Response Serialization，AFNetworking中一共实现了6种学习Response Serialization，分别为：AFURLResponseSerialization、AFJSONResponseSerializer、AFXMLPa">
+<meta name="twitter:title" content="JBChartView源码解读">
+<meta name="twitter:description" content="JBChartView是一款iOS图表库，包含折线图和直方图。使用方便且可定制高。JBChartView所有的实现都类似UITableView的数据源和委托模式，所以说如果你对UITableView或者UITabelViewController的使用比较熟悉，使用JBChartView将会轻而易举。">
 
 
 
@@ -74,7 +74,7 @@
   };
 </script>
 
-  <title> AFNetworking3.1源码解读<三> | NerdFooProgrammer's blog </title>
+  <title> JBChartView源码解读 | NerdFooProgrammer's blog </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -204,7 +204,7 @@
             
             
               
-                AFNetworking3.1源码解读<三>
+                JBChartView源码解读
               
             
           </h1>
@@ -213,8 +213,8 @@
         <div class="post-meta">
           <span class="post-time">
             发表于
-            <time itemprop="dateCreated" datetime="2016-08-24T22:59:41+08:00" content="2016-08-24">
-              2016-08-24
+            <time itemprop="dateCreated" datetime="2017-09-04T22:24:13+08:00" content="2017-09-04">
+              2017-09-04
             </time>
           </span>
 
@@ -224,8 +224,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/08/24/AFNetworking3-1源码解读<三>/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/08/24/AFNetworking3-1源码解读<三>/" itemprop="commentsCount"></span>
+                <a href="/2017/09/04/JBChartView源码解读/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/09/04/JBChartView源码解读/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -244,40 +244,51 @@
       
 
       
-        <span itemprop="articleBody"><p>上篇文章<a href="http://nerdfooprogrammer.github.io/2016/07/29/AFNetworking3-1源码解读-二/">AFNetworking3.1源码解读&lt;二&gt;</a>主要学习了Request Serialization相关部分，本篇主要学习Response Serialization，AFNetworking中一共实现了6种学习Response Serialization，分别为：AFURLResponseSerialization、AFJSONResponseSerializer、AFXMLParserResponseSerializer、AFPropertyListResponseSerializer、AFImageResponseSerializer和AFCompoundResponseSerializer，我们使用的时候根据自身与服务器协商的数据格式选用相应的Response Serialization即可。</p>
+        <span itemprop="articleBody"><p>JBChartView是一款iOS图表库，包含折线图和直方图。使用方便且可定制高。JBChartView所有的实现都类似UITableView的数据源和委托模式，所以说如果你对UITableView或者UITabelViewController的使用比较熟悉，使用JBChartView将会轻而易举。</p>
 <a id="more"></a>
-<h3 id="u6570_u636E_u5408_u6CD5_u6027_u68C0_u67E5"><a href="#u6570_u636E_u5408_u6CD5_u6027_u68C0_u67E5" class="headerlink" title="数据合法性检查"></a>数据合法性检查</h3><p>合法性检查主要是根据ContentType和StatusCode来判断的，如过接收到的数据的ContentType不在可接受ContentTypeSets中或者HTTP StatusCode不是2xx，则认为数据非法,返回相应NSError，如果出现错误时想要查看RawData则可以通过userInfo[AFNetworkingOperationFailingURLResponseDataErrorKey]来查看。</p>
-<p>AFURLResponseSerialization的ContentType＝nil，StatusCode为2xx,其子类只改变了ContentType。</p>
-<p>AFJSONResponseSerializer可接受的ContentType为:</p>
-<p><code>[NSSet setWithObjects:@&quot;application/json&quot;, @&quot;text/json&quot;, @&quot;text/javascript&quot;, nil]</code></p>
-<p>AFXMLParserResponseSerializer可接受的ContentType为:</p>
-<p><code>[[NSSet alloc] initWithObjects:@&quot;application/xml&quot;, @&quot;text/xml&quot;, nil]</code></p>
-<p>AFPropertyListResponseSerializer可接受的ContentType为:</p>
-<p><code>[[NSSet alloc] initWithObjects:@&quot;application/x-plist&quot;, nil]</code></p>
-<p>AFImageResponseSerializer可接受的ContentType为:</p>
-<p><code>[[NSSet alloc] initWithObjects:@&quot;image/tiff&quot;, @&quot;image/jpeg&quot;, @&quot;image/gif&quot;, @&quot;image/png&quot;, @&quot;image/ico&quot;, @&quot;image/x-icon&quot;, @&quot;image/bmp&quot;, @&quot;image/x-bmp&quot;, @&quot;image/x-xbitmap&quot;, @&quot;image/x-win-bitmap&quot;, nil]</code></p>
-<p>AFCompoundResponseSerializer则由使用者根据自身场景对上述5种ResponseSerializer的组合。</p>
-<h3 id="RawData_u89E3_u7801"><a href="#RawData_u89E3_u7801" class="headerlink" title="RawData解码"></a>RawData解码</h3><p>所有的Response Serialization均实现了下面这个接口，该接口返回解码后的数据。</p>
-<pre><code>@protocol AFURLResponseSerialization 
-
-- (nullable id)responseObjectForResponse:(nullable NSURLResponse *)response
-                           data:(nullable NSData *)data
-                          error:(NSError * _Nullable __autoreleasing *)error
-
-@end
-</code></pre><p>AFURLResponseSerialization解码时不做任何处理，直接返回RawData。<br>AFJSONResponseSerializer返回JSON格式数据，核心代码如下:</p>
-<pre><code>responseObject = [NSJSONSerialization JSONObjectWithData:data options:self.readingOptions error:&amp;serializationError];
-</code></pre><p>AFXMLParserResponseSerializer返回XML格式数据，核心代码如下:</p>
-<pre><code>[[NSXMLParser alloc] initWithData:data];
-</code></pre><p>AFPropertyListResponseSerializer返回plist格式数据，核心代码如下:</p>
-<pre><code>responseObject = [NSPropertyListSerialization propertyListWithData:data options:self.readOptions format:NULL error:&amp;serializationError];
-</code></pre><p>AFImageResponseSerializer返回UIImage*格式数据，核心代码如下:</p>
-<pre><code>if (self.automaticallyInflatesResponseImage) {
-        return AFInflatedImageFromResponseWithDataAtScale((NSHTTPURLResponse *)response, data, self.imageScale);
-    } else {
-        return AFImageWithDataAtScale(data, self.imageScale);
-    }
-</code></pre></span>
+<p>JBChartView包含折线图和直方图，本文主要记录对barChart直方图的源码学习。JBBarChartView是直方图的具体类型，要创建该对象只需简单几步：</p>
+<ol>
+<li>初始化并设置数据源和代理</li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">JBBarChartView *barChartView = [[JBBarChartView alloc] init];&#10;barChartView.dataSource = self;&#10;barChartView.delegate = self;&#10;[self addSubview:barChartView];</span><br></pre></td></tr></table></figure>
+<ol>
+<li>析构时清除相关属性</li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- (void)dealloc&#10;&#123;&#10;&#9;JBBarChartView *barChartView = ...; // i.e. _barChartView&#10;&#9;barChartView.delegate = nil;&#10;&#9;barChartView.dataSource = nil;&#10;&#125;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>实现必须的数据源和委托方法</li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">//datasource&#10;- (NSUInteger)numberOfBarsInBarChartView:(JBBarChartView *)barChartView&#10;&#123;&#10;&#9;return ...; // number of bars in chart&#10;&#125;&#10;&#10;//delegate&#10;- (CGFloat)barChartView:(JBBarChartView *)barChartView heightForBarViewAtIndex:(NSUInteger)index&#10;&#123;&#10;&#9;return ...; // height of bar at index&#10;&#125;</span><br></pre></td></tr></table></figure>
+<p>4.确保设置了barChartView的frame及至少调用了一次reloadData方法</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">barChartView.frame = CGRectMake( ... );&#10;[barChartView reloadData];</span><br></pre></td></tr></table></figure>
+<p>##直方图绘制</p>
+<p>上述只是介绍了如何使用JBBarChartView，那JBBarChartView是如何实现直方图的绘制呢？一切还得从<code>[barChartView reloadData]</code>说起。reloadData把直方图的绘制分成了多个步骤，分别为：</p>
+<ol>
+<li>创建数据模型</li>
+<li>获取bar间距</li>
+<li>创建选择View（垂直）</li>
+<li>创建和固定bar view(s)</li>
+<li>布局头和尾视图</li>
+<li>刷新图表状态</li>
+</ol>
+<p>下面详细讲解每个步骤是如何实现的。</p>
+<h4 id="u521B_u5EFA_u6570_u636E_u6A21_u578B"><a href="#u521B_u5EFA_u6570_u636E_u6A21_u578B" class="headerlink" title="创建数据模型"></a>创建数据模型</h4><p>首先通过datasource获取bar的个数，然后通过delgate获取每一个bar的高度，把这些bar的height存放进NSArray即完成了数据模型的创建。大体代码逻辑如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">NSUInteger dataCount = [self.dataSource numberOfBarsInBarChartView:self];&#10;NSMutableArray *mutableChartData = [NSMutableArray array];&#10;for (NSUInteger index=0; index&#60;dataCount; index++)&#10;&#123;&#10;    CGFloat height = [self.delegate barChartView:self heightForBarViewAtIndex:index];&#10;    [mutableChartData addObject:[NSNumber numberWithFloat:height]];&#10;&#125;&#10;self.chartData = [NSArray arrayWithArray:mutableChartData];</span><br></pre></td></tr></table></figure>
+<p>####获取bar间距</p>
+<p>为了绘制直方图，需要获取bar间距以便设置每一个bar的x坐标。</p>
+<p>首先查看delegate是否指定了barPadding，如果指定了就用delegate的，否则就用一个自定义的小算法计算barPadding（50*总bar数的倒数），相关代码如下:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">NSUInteger totalBars = [self.chartData count];&#10;self.barPadding = (1/(float)totalBars) * kJBBarChartViewBarBasePaddingMutliplier;</span><br></pre></td></tr></table></figure>
+<h4 id="u521B_u5EFA_u9009_u62E9View_uFF08_u5782_u76F4_uFF09"><a href="#u521B_u5EFA_u9009_u62E9View_uFF08_u5782_u76F4_uFF09" class="headerlink" title="创建选择View（垂直）"></a>创建选择View（垂直）</h4><p>首先计算选择View的Height(self.bounds.size.height-self.headerView.frame.size.height - self.footerView.frame.size.height - self.headerPadding - self.footerPadding)，如果datasource设置了允许延伸到Header或者Footer，那么verticalSelectionViewHeight需要再加上相关的padding。然后计算选择View的宽度(整个CharView的宽度-所有barPadding的宽度，然后再除以bar的个数)，得到高度和宽度后创建选择View(JBChartVerticalSelectionView)，最后添加到CharView上。</p>
+<h4 id="u521B_u5EFA_u548C_u56FA_u5B9Abar_view_28s_29"><a href="#u521B_u5EFA_u548C_u56FA_u5B9Abar_view_28s_29" class="headerlink" title="创建和固定bar view(s)"></a>创建和固定bar view(s)</h4><p>遍历数据模型，每一个模型点创建一个bar，具体创建bar的过程如下：</p>
+<p>首先查看datasource、delegate是否创建了barView，如果创建了就使用（具体优先级为:delegate的barGradient &gt; delegate的colorForBar &gt; dataSource的barView），如果没创建就新建一个UIView，然后设置bar view的frame，bar的高度如何计算呢？JBBarChartView使用了归一化高度，即根据数据模型里面最大值、最小值及JBChartView可用绘图的高度计算出每一个bar最终显示的在View上的高度，归一化的相关代码如下:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- (CGFloat)normalizedHeightForRawHeight:(NSNumber *)rawHeight&#10;&#123;&#10;&#9;CGFloat minHeight = [self minimumValue];&#10;&#9;CGFloat maxHeight = [self maximumValue];&#10;&#9;CGFloat value = [rawHeight floatValue];&#10;&#9;&#10;&#9;if ((maxHeight - minHeight) &#60;= 0)&#10;&#9;&#123;&#10;&#9;&#9;return [self availableHeight];&#10;&#9;&#125;&#10;&#9;&#10;&#9;return ((value - minHeight) / (maxHeight - minHeight)) * [self availableHeight];&#10;&#125;</span><br></pre></td></tr></table></figure>
+<p>bar view的x坐标就根据bar的宽度和barPadding计算得出，最后设置barView的frame，然后把barView添加到JBBarChartView上。</p>
+<h4 id="u5E03_u5C40_u5934_u548C_u5C3E_u89C6_u56FE"><a href="#u5E03_u5C40_u5934_u548C_u5C3E_u89C6_u56FE" class="headerlink" title="布局头和尾视图"></a>布局头和尾视图</h4><p>因header和footer要添加到JBBarChartView上，故而需要对它们的frame做一些调整（相对布局），具体代码如下:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dispatch_block_t layoutHeaderAndFooterBlock = ^&#123;&#10;self.headerView.frame = CGRectMake(self.bounds.origin.x, self.bounds.origin.y, self.bounds.size.width, self.headerView.frame.size.height);&#10;self.footerView.frame = CGRectMake(self.bounds.origin.x, self.bounds.size.height - self.footerView.frame.size.height, self.bounds.size.width, self.footerView.frame.size.height);&#10;&#9;&#125;;</span><br></pre></td></tr></table></figure>
+<h4 id="u5237_u65B0_u56FE_u8868_u72B6_u6001"><a href="#u5237_u65B0_u56FE_u8868_u72B6_u6001" class="headerlink" title="刷新图表状态"></a>刷新图表状态</h4><p>主要刷新了当前状态（JBChartViewStateExpanded或者JBChartViewStateCollapsed)，及关闭了reloading标志位，表明可以执行reloaddata。</p>
+<h2 id="u89E6_u6478_u4E8B_u4EF6"><a href="#u89E6_u6478_u4E8B_u4EF6" class="headerlink" title="触摸事件"></a>触摸事件</h2><p>当用户触摸图表时，JBBarChartView会把当状态（当前触摸了哪个bar、哪个bar取消触摸了）发送给delegate。具体实现是利用touches方法，来检测触摸开始、移动、结束或者取消状态，触摸开始、移动时根据触摸点Point来判断当前触摸的是哪个bar，实时发送给delegate，当结束或者取消时也根据最后的触摸点Point来计算出是哪个bar实时发送给delegate。具体代码可参考如下4个方法:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#pragma mark - Touches&#10;&#10;- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event&#10;&#123;&#10;&#9;[self setVerticalSelectionViewVisible:NO animated:NO];&#10;&#9;[self touchesBeganOrMovedWithTouches:touches];&#10;&#125;&#10;&#10;- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event&#10;&#123;&#10;&#9;[self touchesBeganOrMovedWithTouches:touches];&#10;&#125;&#10;&#10;- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event&#10;&#123;&#10;&#9;[self touchesEndedOrCancelledWithTouches:touches];&#10;&#125;&#10;&#10;- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event&#10;&#123;&#10;&#9;[self touchesEndedOrCancelledWithTouches:touches];&#10;&#125;</span><br></pre></td></tr></table></figure>
+</span>
       
     </div>
 
@@ -288,17 +299,13 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/07/29/AFNetworking3-1源码解读-二/" rel="next" title="AFNetworking3.1源码解读<二>">
-                <i class="fa fa-chevron-left"></i> AFNetworking3.1源码解读<二>
+              <a href="/2017/09/03/FMDB源码解读/" rel="next" title="FMDB源码解读">
+                <i class="fa fa-chevron-left"></i> FMDB源码解读
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/08/31/AFNetworking3-1源码解读-四/" rel="prev" title="AFNetworking3.1源码解读<四>">
-                AFNetworking3.1源码解读<四> <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -325,8 +332,8 @@
         
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2016/08/24/AFNetworking3-1源码解读<三>/"
-           data-title="AFNetworking3.1源码解读<三>" data-url="http://nerdfooprogrammer.github.io/2016/08/24/AFNetworking3-1源码解读<三>/">
+      <div class="ds-thread" data-thread-key="2017/09/04/JBChartView源码解读/"
+           data-title="JBChartView源码解读" data-url="http://nerdfooprogrammer.github.io/2017/09/04/JBChartView源码解读/">
       </div>
     
   </div>
@@ -433,7 +440,7 @@
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#u6570_u636E_u5408_u6CD5_u6027_u68C0_u67E5"><span class="nav-number">1.</span> <span class="nav-text">数据合法性检查</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RawData_u89E3_u7801"><span class="nav-number">2.</span> <span class="nav-text">RawData解码</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#u521B_u5EFA_u6570_u636E_u6A21_u578B"><span class="nav-number">1.</span> <span class="nav-text">创建数据模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#u521B_u5EFA_u9009_u62E9View_uFF08_u5782_u76F4_uFF09"><span class="nav-number">2.</span> <span class="nav-text">创建选择View（垂直）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#u521B_u5EFA_u548C_u56FA_u5B9Abar_view_28s_29"><span class="nav-number">3.</span> <span class="nav-text">创建和固定bar view(s)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#u5E03_u5C40_u5934_u548C_u5C3E_u89C6_u56FE"><span class="nav-number">4.</span> <span class="nav-text">布局头和尾视图</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#u5237_u65B0_u56FE_u8868_u72B6_u6001"><span class="nav-number">5.</span> <span class="nav-text">刷新图表状态</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#u89E6_u6478_u4E8B_u4EF6"><span class="nav-number"></span> <span class="nav-text">触摸事件</span></a></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator">
