@@ -60,7 +60,7 @@
 <meta property="og:site_name" content="NerdFooProgrammer's blog">
 <meta property="og:description" content="图片显示、缓存应该是每个App必不可少的功能了，而SDWebImage就是用Objective－C实现该功能的一个库，在iOS App开发中几乎都用到了它，与AFNetworking一样几乎成为了App开发标配三方库。">
 <meta property="og:image" content="https://github.com/rs/SDWebImage/raw/master/Docs/SDWebImageSequenceDiagram.png">
-<meta property="og:updated_time" content="2017-08-20T08:42:05.000Z">
+<meta property="og:updated_time" content="2017-09-06T13:58:16.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SDWebImage源码解读">
 <meta name="twitter:description" content="图片显示、缓存应该是每个App必不可少的功能了，而SDWebImage就是用Objective－C实现该功能的一个库，在iOS App开发中几乎都用到了它，与AFNetworking一样几乎成为了App开发标配三方库。">
@@ -247,7 +247,6 @@
       
         <span itemprop="articleBody"><p>图片显示、缓存应该是每个App必不可少的功能了，而<a href="https://github.com/rs/SDWebImage" target="_blank" rel="external">SDWebImage</a>就是用Objective－C实现该功能的一个库，在iOS App开发中几乎都用到了它，与AFNetworking一样几乎成为了App开发标配三方库。<br><a id="more"></a></p>
 <h2 id="u7279_u6027"><a href="#u7279_u6027" class="headerlink" title="特性"></a>特性</h2><p>SDWebImage具有的特性是相当诱人的，此处直接引用官方对它的介绍:</p>
-<blockquote>
 <h4 id="Features"><a href="#Features" class="headerlink" title="Features"></a>Features</h4><ul>
 <li>Categories for UIImageView, UIButton, MKAnnotationView adding web image and cache management</li>
 <li>An asynchronous image downloader</li>
@@ -257,14 +256,18 @@
 <li>A guarantee that bogus URLs won’t be retried again and again</li>
 <li>A guarantee that main thread will never be blocked</li>
 <li>Performances!</li>
-<li>Use GCD and ARC<h2 id="u539F_u7406"><a href="#u539F_u7406" class="headerlink" title="原理"></a>原理</h2>SDWebImage默认缓存实现是非常激进的，它忽略HTTP服务器返回的所有cache－control头，然后没有时间限制地缓存返回的图片，这就暗示了你的图片的URL是静态的，也就是说每个URL指向的图片内容是不会改变的，如果指向的图片内容改变了，那么组成该URL的某个部分肯定也发生了改变。<h4 id="u7F13_u5B58_u7684_u5B58_u50A8_u5F62_u5F0F"><a href="#u7F13_u5B58_u7684_u5B58_u50A8_u5F62_u5F0F" class="headerlink" title="缓存的存储形式"></a>缓存的存储形式</h4>SDWebImage实现了2种缓存：内存缓存和磁盘缓存。内存缓存重启App就没了，用的是系统的NSCache，系统会根据设置的countLimit、totalCostLimit对存储的内容进行缓存及释放；磁盘缓存方式就是把接收到的图片数据存储到文件中，每张图片存储一个文件，这些文件都位于指定缓存路径的目录下，文件名是MD5(URL)。<h4 id="u7F13_u5B58_u79FB_u9664_u7B56_u7565"><a href="#u7F13_u5B58_u79FB_u9664_u7B56_u7565" class="headerlink" title="缓存移除策略"></a>缓存移除策略</h4></li>
+<li>Use GCD and ARC</li>
 </ul>
-<ul>
+<h2 id="u539F_u7406"><a href="#u539F_u7406" class="headerlink" title="原理"></a>原理</h2><p>SDWebImage默认缓存实现是非常激进的，它忽略HTTP服务器返回的所有cache－control头，然后没有时间限制地缓存返回的图片，这就暗示了你的图片的URL是静态的，也就是说每个URL指向的图片内容是不会改变的，如果指向的图片内容改变了，那么组成该URL的某个部分肯定也发生了改变。</p>
+<h4 id="u7F13_u5B58_u7684_u5B58_u50A8_u5F62_u5F0F"><a href="#u7F13_u5B58_u7684_u5B58_u50A8_u5F62_u5F0F" class="headerlink" title="缓存的存储形式"></a>缓存的存储形式</h4><p>SDWebImage实现了2种缓存：内存缓存和磁盘缓存。内存缓存重启App就没了，用的是系统的NSCache，系统会根据设置的countLimit、totalCostLimit对存储的内容进行缓存及释放；磁盘缓存方式就是把接收到的图片数据存储到文件中，每张图片存储一个文件，这些文件都位于指定缓存路径的目录下，文件名是MD5(URL)。</p>
+<h4 id="u7F13_u5B58_u79FB_u9664_u7B56_u7565"><a href="#u7F13_u5B58_u79FB_u9664_u7B56_u7565" class="headerlink" title="缓存移除策略"></a>缓存移除策略</h4><ul>
 <li>内存缓存移除：当监听到系统的<code>UIApplicationDidReceiveMemoryWarningNotification</code>通知时清除所有的内存缓存，如果设置了内存缓存的countLimit、totalCostLimit属性，则在没收到内存告警通知时都由系统进行移除处理。</li>
-<li>磁盘缓存移除：在将要结束App和App进入后台后会进行磁盘过期文件删除，所谓过期文件就是指超过1周的文件(默认实现是1周)，如果设置了最大的缓存size，那么当把过期的文件全部删除后剩余文件的总大小依然超过最大size的话则会根据剩余文件的修改日期进行排序依次删除文件，一直到剩余文件的总大小为size/2。<h2 id="SDWebImage_u4F7F_u7528_u65B9_u6CD5"><a href="#SDWebImage_u4F7F_u7528_u65B9_u6CD5" class="headerlink" title="SDWebImage使用方法"></a>SDWebImage使用方法</h2>SDWebImage官方已经给出了How To Use，此处直接引用:</li>
+<li><p>磁盘缓存移除：在将要结束App和App进入后台后会进行磁盘过期文件删除，所谓过期文件就是指超过1周的文件(默认实现是1周)，如果设置了最大的缓存size，那么当把过期的文件全部删除后剩余文件的总大小依然超过最大size的话则会根据剩余文件的修改日期进行排序依次删除文件，一直到剩余文件的总大小为size/2。</p>
+<h2 id="SDWebImage_u4F7F_u7528_u65B9_u6CD5"><a href="#SDWebImage_u4F7F_u7528_u65B9_u6CD5" class="headerlink" title="SDWebImage使用方法"></a>SDWebImage使用方法</h2><p>SDWebImage官方已经给出了How To Use，此处直接引用:</p>
+<p>  import <sdwebimage uiimageview+webcache.h=""><br>  …<br>  [imageView sd_setImageWithURL:[NSURL URLWithString:@”<a href="http://www.domain.com/path/to/image.jpg" target="_blank" rel="external">http://www.domain.com/path/to/image.jpg</a>“]</sdwebimage></p>
+<pre><code>placeholderImage:[UIImage imageNamed:@&quot;placeholder.png&quot;]];
+</code></pre></li>
 </ul>
-</blockquote>
-<p>&gt;<br>    import <sdwebimage uiimageview+webcache.h=""><br>    …<br>    [imageView sd_setImageWithURL:[NSURL URLWithString:@”<a href="http://www.domain.com/path/to/image.jpg" target="_blank" rel="external">http://www.domain.com/path/to/image.jpg</a>“]<br>                 placeholderImage:[UIImage imageNamed:@”placeholder.png”]];</sdwebimage></p>
 <p>##SDWebImage运行流程</p>
 <p>SDWebImage官方画了一个时序图，<br><img src="https://github.com/rs/SDWebImage/raw/master/Docs/SDWebImageSequenceDiagram.png" alt=""><br>从该图中可以很好地了解它的大概运动流程:首先UIImageView的分类会设置一个图片对应的URL，然后进行一些内部处理，加载该URL对应的图片，在加载URL对应的图片时会查询URL图片信息是否已经缓存了，如果缓存了则直接使用缓存，如果没有缓存则请求网络加载图片，网络返回图片数据后把数据存储到磁盘上并且返回图片数据给上层使用。</p>
 <p>##SDWebImage中使用到技术</p>
