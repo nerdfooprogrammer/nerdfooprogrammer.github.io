@@ -59,7 +59,7 @@
 <meta property="og:url" content="http://nerdfooprogrammer.github.io/2016/12/10/MJRefresh源码阅读-一/index.html">
 <meta property="og:site_name" content="NerdFooProgrammer's blog">
 <meta property="og:description" content="“下拉刷新”和“上拉加载更多”应该是App标配的功能了，而iOS SDK只提供了UIRefreshControl控件且只有“下拉刷新”功能且只能用于UITableViewController,所以当项目中没有用到UITableViewController或者需要定制“下拉刷新”和“上拉加载更多”时只能自己定制实现，好在这块有好多现成的开源库，国内这块做的比较好的是小码哥的MJRefresh,今天就">
-<meta property="og:updated_time" content="2016-12-15T00:12:45.000Z">
+<meta property="og:updated_time" content="2017-09-07T14:25:48.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MJRefresh源码阅读<一>">
 <meta name="twitter:description" content="“下拉刷新”和“上拉加载更多”应该是App标配的功能了，而iOS SDK只提供了UIRefreshControl控件且只有“下拉刷新”功能且只能用于UITableViewController,所以当项目中没有用到UITableViewController或者需要定制“下拉刷新”和“上拉加载更多”时只能自己定制实现，好在这块有好多现成的开源库，国内这块做的比较好的是小码哥的MJRefresh,今天就">
@@ -288,9 +288,8 @@
 </code></pre><h2 id="u4E0B_u62C9_u5237_u65B0_u5177_u4F53_u5B9E_u73B0_u7EC6_u8282"><a href="#u4E0B_u62C9_u5237_u65B0_u5177_u4F53_u5B9E_u73B0_u7EC6_u8282" class="headerlink" title="下拉刷新具体实现细节"></a>下拉刷新具体实现细节</h2><ol>
 <li>重写willMoveToSuperview方法。当header将要添加到目标view时，会调用该方法，在该方法中设置header的宽度、x坐标、最开始的contentInset、设置永远支持垂直弹簧效果及最重要的KVO scrollView的contentOffset、contentInset和panGestureRecognizer属性。</li>
 <li>重写layoutSubviews方法。当header添加到目标view后会调用该方法，在该方法中设置header的y坐标为负的自身高度(高度是在初始话时设置的)，这样header在初始状态时看不到，至此整个header的初始化工作就已完成，剩下的就是监听scrollview的属性改变自身状态。</li>
-<li></li>
 </ol>
-<h2 id="u81EA_u52A8_u4E0A_u62C9_u52A0_u8F7D_u5177_u4F53_u5B9E_u73B0_u7EC6_u8282"><a href="#u81EA_u52A8_u4E0A_u62C9_u52A0_u8F7D_u5177_u4F53_u5B9E_u73B0_u7EC6_u8282" class="headerlink" title="自动上拉加载具体实现细节"></a>自动上拉加载具体实现细节</h2></span>
+</span>
       
     </div>
 
@@ -446,7 +445,7 @@
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#u539F_u7406"><span class="nav-number">1.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Runtime"><span class="nav-number">2.</span> <span class="nav-text">Runtime</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#category_u589E_u52A0_u5C5E_u6027"><span class="nav-number">2.1.</span> <span class="nav-text">category增加属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#method_swizzling"><span class="nav-number">2.2.</span> <span class="nav-text">method swizzling</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#u4E0B_u62C9_u5237_u65B0_u5177_u4F53_u5B9E_u73B0_u7EC6_u8282"><span class="nav-number">3.</span> <span class="nav-text">下拉刷新具体实现细节</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#u81EA_u52A8_u4E0A_u62C9_u52A0_u8F7D_u5177_u4F53_u5B9E_u73B0_u7EC6_u8282"><span class="nav-number">4.</span> <span class="nav-text">自动上拉加载具体实现细节</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#u539F_u7406"><span class="nav-number">1.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Runtime"><span class="nav-number">2.</span> <span class="nav-text">Runtime</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#category_u589E_u52A0_u5C5E_u6027"><span class="nav-number">2.1.</span> <span class="nav-text">category增加属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#method_swizzling"><span class="nav-number">2.2.</span> <span class="nav-text">method swizzling</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#u4E0B_u62C9_u5237_u65B0_u5177_u4F53_u5B9E_u73B0_u7EC6_u8282"><span class="nav-number">3.</span> <span class="nav-text">下拉刷新具体实现细节</span></a></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator">

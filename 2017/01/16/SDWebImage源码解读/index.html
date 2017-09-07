@@ -60,7 +60,7 @@
 <meta property="og:site_name" content="NerdFooProgrammer's blog">
 <meta property="og:description" content="图片显示、缓存应该是每个App必不可少的功能了，而SDWebImage就是用Objective－C实现该功能的一个库，在iOS App开发中几乎都用到了它，与AFNetworking一样几乎成为了App开发标配三方库。">
 <meta property="og:image" content="https://github.com/rs/SDWebImage/raw/master/Docs/SDWebImageSequenceDiagram.png">
-<meta property="og:updated_time" content="2017-09-06T14:01:22.000Z">
+<meta property="og:updated_time" content="2017-09-07T14:24:47.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SDWebImage源码解读">
 <meta name="twitter:description" content="图片显示、缓存应该是每个App必不可少的功能了，而SDWebImage就是用Objective－C实现该功能的一个库，在iOS App开发中几乎都用到了它，与AFNetworking一样几乎成为了App开发标配三方库。">
@@ -284,8 +284,8 @@
 }
 </code></pre><p>通过用<code>objc_setAssociatedObject</code>和<code>objc_getAssociatedObject</code>方法就实现了为UIView+WebCache分类中新增sd_imageURL属性。</p>
 <h4 id="u591A_u7EBF_u7A0B_u6280_u672F"><a href="#u591A_u7EBF_u7A0B_u6280_u672F" class="headerlink" title="多线程技术"></a>多线程技术</h4><ul>
-<li>为操作共享资源创建串行队列<br>操作共享资源除了使用锁技术，还可以用GCD串行队列。这两者有什么区别呢？如果用锁的话当访问共享资源出线竞争时会卡住等待访问的线程，而使用dispatch_async GCD串行队列的话则可避免此类问题，提升性能。SDImageCache中创建了IO串行队列(GCD)，用于对文件安全操作(查询、增加、删除，比如当网络返回数据准备存储到磁盘时，此时切换进入后台开始删除文件，就有可能出现错误)。</li>
-<li><p>多读单写提高性能<br>假如有一个用户类User,该类有个好友属性@property(nonatomic,strong) NSMutableArray *friends;有多个线程在会操作friends属性，那么我们为了让friends多线程安全可能会这么写:</p>
+<li>为操作共享资源创建串行队列<br>操作共享资源除了使用锁技术，还可以用GCD串行队列。这两者有什么区别呢？如果用锁的话当访问共享资源出现竞争时会卡住等待访问的线程，而使用dispatch_async GCD串行队列的话则可避免此类问题，提升性能。SDImageCache中创建了IO串行队列(GCD)，用于对文件安全操作(查询、增加、删除，比如当网络返回数据准备存储到磁盘时，此时切换进入后台开始删除文件，就有可能出现错误)。</li>
+<li><p>多读单写提高性能<br>假如有一个用户类User,该类有个好友属性@property(nonatomic,strong) NSMutableArray *friends;有多个线程会操作friends属性，那么我们为了让friends多线程安全可能会这么写:</p>
 <p>  //获取好友列表<br>  -(NSArray<em>)fetchFriends<br>  {<br>  @synchronized (_friends) {<br>  return _friends;<br>  }<br>  }<br>  //增加好友<br>  -(void)addFriend:(NSString</em>)friend<br>  {<br>  @synchronized (_friends) {<br>  [_friends addObject:friend];<br>  }<br>  }</p>
 </li>
 </ul>
@@ -314,7 +314,7 @@ _barrierQueue = dispatch_queue_create(&quot;com.hackemist.SDWebImageDownloaderOp
     return [callbacks copy];    // strip mutability here
 }
 </code></pre><h2 id="u5F02_u6B65_u4E0B_u8F7D_u5668"><a href="#u5F02_u6B65_u4E0B_u8F7D_u5668" class="headerlink" title="异步下载器"></a>异步下载器</h2><p>SDWebImageDownloader是一个异步下载器，是通过NSOperationQueue和自定义NSOperation类(SDWebImageDownloaderOperation)实现的，SDWebImageDownloaderOperation被抽象为一个网络请求，那SDWebImageDownloaderOperation是如何实现的？SDWebImageDownloaderOperation是继承自NSOperation(NSOperation是一个抽象类)的，所以SDWebImageDownloaderOperation需实现一些NSOperation定义好的接口：</p>
-<pre><code>//是否是异步，因为图片下载是一个网络请求，所以执行task肯定是一个异步操作，如果是不是异步的话那么当执行完start和main方法后该Operation就认为结束了，就从NSOperationQueue中删除了，这显示不是我们想要的，我们想要的是当从网络上接收完数据后才结束。
+<pre><code>//是否是异步，因为图片下载是一个网络请求，所以执行task肯定是一个异步操作，如果是不是异步的话那么当执行完start和main方法后该Operation就认为结束了，就从NSOperationQueue中删除了，这显然不是我们想要的，我们想要的是当从网络上接收完数据后才结束。
 - (BOOL)isConcurrent {
     return YES;
 }        
@@ -344,7 +344,8 @@ _finished = finished;
     [self cancelInternal];
 }
 }
-</code></pre><h2 id="weak-strong_dance"><a href="#weak-strong_dance" class="headerlink" title="weak-strong dance"></a>weak-strong dance</h2><h2 id="SDImageCacheConfig"><a href="#SDImageCacheConfig" class="headerlink" title="SDImageCacheConfig"></a>SDImageCacheConfig</h2><h2 id="bogus_URLs_won_u2019t_be_retried_again_and_again"><a href="#bogus_URLs_won_u2019t_be_retried_again_and_again" class="headerlink" title="bogus URLs won’t be retried again and again"></a>bogus URLs won’t be retried again and again</h2><h2 id="filter_URL"><a href="#filter_URL" class="headerlink" title="filter URL"></a>filter URL</h2></span>
+</code></pre><h2 id="weak-strong_dance"><a href="#weak-strong_dance" class="headerlink" title="weak-strong dance"></a>weak-strong dance</h2><p>为了避免循环引用引发的内存泄漏，SDWebImage中使用了大量的weak-strong dance,比如如下代码:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">__weak SDWebImageDownloader *wself = self;&#10;    return [self addProgressCallback:progressBlock completedBlock:completedBlock forURL:url createCallback:^SDWebImageDownloaderOperation *&#123;&#10;        __strong __typeof (wself) sself = wself;&#10;        NSTimeInterval timeoutInterval = sself.downloadTimeout;&#10;        if (timeoutInterval == 0.0) &#123;&#10;            timeoutInterval = 15.0;&#10;        &#125;</span><br></pre></td></tr></table></figure></span>
       
     </div>
 
@@ -500,7 +501,7 @@ _finished = finished;
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#u7279_u6027"><span class="nav-number">1.</span> <span class="nav-text">特性</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Features"><span class="nav-number">1.0.1.</span> <span class="nav-text">Features</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#u539F_u7406"><span class="nav-number">2.</span> <span class="nav-text">原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#u7F13_u5B58_u7684_u5B58_u50A8_u5F62_u5F0F"><span class="nav-number">2.0.1.</span> <span class="nav-text">缓存的存储形式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#u7F13_u5B58_u79FB_u9664_u7B56_u7565"><span class="nav-number">2.0.2.</span> <span class="nav-text">缓存移除策略</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SDWebImage_u4F7F_u7528_u65B9_u6CD5"><span class="nav-number">3.</span> <span class="nav-text">SDWebImage使用方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#category"><span class="nav-number">3.0.1.</span> <span class="nav-text">category</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#u591A_u7EBF_u7A0B_u6280_u672F"><span class="nav-number">3.0.2.</span> <span class="nav-text">多线程技术</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#u5F02_u6B65_u4E0B_u8F7D_u5668"><span class="nav-number">4.</span> <span class="nav-text">异步下载器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#weak-strong_dance"><span class="nav-number">5.</span> <span class="nav-text">weak-strong dance</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SDImageCacheConfig"><span class="nav-number">6.</span> <span class="nav-text">SDImageCacheConfig</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#bogus_URLs_won_u2019t_be_retried_again_and_again"><span class="nav-number">7.</span> <span class="nav-text">bogus URLs won’t be retried again and again</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#filter_URL"><span class="nav-number">8.</span> <span class="nav-text">filter URL</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#u7279_u6027"><span class="nav-number">1.</span> <span class="nav-text">特性</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Features"><span class="nav-number">1.0.1.</span> <span class="nav-text">Features</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#u539F_u7406"><span class="nav-number">2.</span> <span class="nav-text">原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#u7F13_u5B58_u7684_u5B58_u50A8_u5F62_u5F0F"><span class="nav-number">2.0.1.</span> <span class="nav-text">缓存的存储形式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#u7F13_u5B58_u79FB_u9664_u7B56_u7565"><span class="nav-number">2.0.2.</span> <span class="nav-text">缓存移除策略</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SDWebImage_u4F7F_u7528_u65B9_u6CD5"><span class="nav-number">3.</span> <span class="nav-text">SDWebImage使用方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#category"><span class="nav-number">3.0.1.</span> <span class="nav-text">category</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#u591A_u7EBF_u7A0B_u6280_u672F"><span class="nav-number">3.0.2.</span> <span class="nav-text">多线程技术</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#u5F02_u6B65_u4E0B_u8F7D_u5668"><span class="nav-number">4.</span> <span class="nav-text">异步下载器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#weak-strong_dance"><span class="nav-number">5.</span> <span class="nav-text">weak-strong dance</span></a></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator">
